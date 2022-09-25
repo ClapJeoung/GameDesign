@@ -18,7 +18,11 @@ public class Player_Move : MonoBehaviour
   private Vector2[] Vertex_top, Vertex_bottom,Vertex_right,Vertex_left;//충돌 검사할 점 위치
   private Transform MyTransform;                      //내 트랜스폼
   private bool Jumpable = true;                       //지금 점프 가능한지
+  private float jumptime = 0.0f;
+  private float JumpTime { get { return jumptime; } set { jumptime = value; if (jumptime >= MaxJumpTime) Jumpable = false; } }
+  [SerializeField] private float MaxJumpTime = 0.6f;  //최대 점프 시간
 
+  [SerializeField] private TMPro.TextMeshProUGUI asdf = null;
 
   private void Awake()
   {
@@ -41,8 +45,8 @@ public class Player_Move : MonoBehaviour
     {
       Vertex_top[i] = new Vector2(-_width / 2 + _size_width * i, _height / 2);
       Vertex_bottom[i] = new Vector2(-_width / 2 + _size_width * i, -_height / 2);
-      Vertex_right[i] = new Vector2(_width / 2, -_height / 2 + _size_height * VertexCount);
-      Vertex_left[i] = new Vector2(-_width / 2, -_height / 2 + _size_height * VertexCount);
+      Vertex_right[i] = new Vector2(_width / 2, -_height / 2 + _size_height * i);
+      Vertex_left[i] = new Vector2(-_width / 2, -_height / 2 + _size_height * i);
     }
   }
   private void UpdateMove()
@@ -53,14 +57,15 @@ public class Player_Move : MonoBehaviour
     else Accel.x = (Velocity.x != 0 ? Mathf.Sign(Velocity.x) : 0) * AccelResist;//아무것도 안 누름 : 가속도가 속도 반대로
 
 
-    if (Input.GetKeyDown(KeyCode.Space) && Jumpable) { Velocity.y = JumpPower; Jumpable = false; } //스페이스바는 점프
+    if (Input.GetKey(KeyCode.Space)&&Jumpable) { Velocity.y = JumpPower;JumpTime += Time.deltaTime; }
 
 
 
     Velocity += Accel * Time.deltaTime;
 
     Velocity = new Vector2(Mathf.Clamp(Velocity.x,-MaxXSpeed,MaxXSpeed), Mathf.Clamp(Velocity.y,-MaxYSpeed,MaxYSpeed));
-
+    Velocity = new Vector2(Mathf.Abs(Velocity.x) < 0.35f ? 0 : Velocity.x, Mathf.Abs(Velocity.y) < 0.15f ? 0 : Velocity.y);
+    asdf.text = Velocity.ToString();
     RaycastVertical();
     RaycastHorizontal();
 
@@ -72,7 +77,7 @@ public class Player_Move : MonoBehaviour
     Vector2 _dir = Velocity.y > 0?Vector2.up : Vector2.down;      //선이 발사되는 위치
     Vector3 _newpos = Vector3.zero;                               //선이 시작되는 위치(플레이어 기준)
     int _layermask;          //레이어마스크(int)
-    float _distance = Velocity.y * Time.deltaTime;                //선이 발사되는 거리
+    float _distance = Mathf.Abs( Velocity.y) * Time.deltaTime;                //선이 발사되는 거리
     RaycastHit2D _hit;                                            //선이 발사되고 닿은 곳의 정보
 
     for (int i = 0; i < VertexCount; i++)
@@ -82,39 +87,87 @@ public class Player_Move : MonoBehaviour
       _hit = Physics2D.Raycast(_newpos, _dir, _distance, _layermask) ;
       if (_hit.transform != null)
       {
-        if (Velocity.y < 0) Jumpable = true;
-        Velocity.y = _hit.distance;
+        if (Velocity.y < 0) { Jumpable = true; JumpTime = 0.0f; }
+        Velocity.y = Mathf.Abs(_hit.distance) > 0.11f ? (_hit.distance - 0.1f)*_dir.y : 0;
         break;
       }
-      if (Velocity.y > 0) continue;
+      _layermask = 1 << LayerMask.NameToLayer("Wooden");  //목재 검사
+      _hit = Physics2D.Raycast(_newpos, _dir, _distance, _layermask);
+      if (_hit.transform != null)
+      {
+        if (Velocity.y < 0) { Jumpable = true; JumpTime = 0.0f; }
+        Velocity.y = Mathf.Abs(_hit.distance) > 0.11f ? (_hit.distance - 0.1f) * _dir.y : 0;
+        break;
+      }
+
+      _layermask = 1 << LayerMask.NameToLayer("Breakable");  //밟아서 부숴지는거 검사
+      _hit = Physics2D.Raycast(_newpos, _dir, _distance, _layermask);
+      if (_hit.transform != null)
+      {
+        if (Velocity.y < 0) { Jumpable = true; JumpTime = 0.0f; }
+        Velocity.y = Mathf.Abs(_hit.distance) > 0.11f ? (_hit.distance - 0.1f) * _dir.y : 0;
+        _hit.transform.GetComponent<Breakable>().Pressed(); //밟아서 부숴지는 이벤트 실행
+        break;
+      }
+
+      if (Velocity.y > 0) continue; //점프 중이면 여기서 종료, 하강 중이면 Upper 블록도 발판으로 인식
       _layermask = 1 << LayerMask.NameToLayer("Upper");  //윗블록 검사
       _hit = Physics2D.Raycast(_newpos, _dir, _distance, _layermask);
       if (_hit.transform != null)
       {
-        if (Velocity.y < 0) Jumpable = true;
-        Velocity.y = _hit.distance;
+        if (Velocity.y < 0) { Jumpable = true; JumpTime = 0.0f; }
+        Velocity.y = Mathf.Abs(_hit.distance) > 0.11f ? (_hit.distance - 0.1f) * _dir.y : 0;
         break;
       }
     }
   }
   private void RaycastHorizontal()//좌우 검사
   {
+    if (Velocity.x == 0) return;
+
     Vector2[] _pos = Velocity.x > 0 ? Vertex_right : Vertex_left; //선이 시작되는 위치(바운드 기준)
     Vector2 _dir = Velocity.x > 0 ? Vector2.right : Vector2.left;      //선이 발사되는 위치
     Vector3 _newpos = Vector3.zero;                               //선이 시작되는 위치(플레이어 기준)
     int _layermask = 1 << LayerMask.NameToLayer("Wall");          //레이어마스크(int)
-    float _distance = Velocity.x * Time.deltaTime;                //선이 발사되는 거리
+    float _distance = Mathf.Abs(Velocity.x) * Time.deltaTime;                //선이 발사되는 거리
     RaycastHit2D _hit;                                            //선이 발사되고 닿은 곳의 정보
+
 
     for (int i = 0; i < VertexCount; i++)
     {
       _newpos = MyTransform.position + (Vector3)_pos[i];
+  //    Debug.Log(i);
+      _layermask = 1 << LayerMask.NameToLayer("Wall");  //벽 검사
       _hit = Physics2D.Raycast(_newpos, _dir, _distance, _layermask);
       if (_hit.transform != null)
       {
-        Velocity.x = _hit.distance;
+        Velocity.x =Mathf.Abs(_hit.distance)>0.11f? (_hit.distance - 0.1f)*_dir.x : 0;
         break;
       }
+      _layermask = 1 << LayerMask.NameToLayer("Wooden");  //목재 검사
+      _hit = Physics2D.Raycast(_newpos, _dir, _distance, _layermask);
+      if (_hit.transform != null)
+      {
+        Velocity.x = Mathf.Abs(_hit.distance) > 0.11f ? (_hit.distance - 0.1f) * _dir.x : 0;
+        break;
+      }
+      _layermask = 1 << LayerMask.NameToLayer("Upper");  //윗블록 검사
+      _hit = Physics2D.Raycast(_newpos, _dir, _distance, _layermask);
+      if (_hit.transform != null)
+      {
+        Velocity.x = Mathf.Abs(_hit.distance) > 0.11f ? (_hit.distance - 0.1f) * _dir.x : 0;
+        break;
+      }
+
+      _layermask = 1 << LayerMask.NameToLayer("Breakable");  //밟아서 부숴지는거 검사, 이벤트 호출은 안함
+      _hit = Physics2D.Raycast(_newpos, _dir, _distance, _layermask);
+      if (_hit.transform != null)
+      {
+        Velocity.x = Mathf.Abs(_hit.distance) > 0.11f ? (_hit.distance - 0.1f) * _dir.x : 0;
+        break;
+      }
+      Debug.DrawRay(_newpos, _dir, Color.red, _distance);
+      //   Debug.Log($"_distance : {_distance}  hit.distance : {_hit.distance}  velocity.x : {Velocity.x}");
     }
   }
   private void Update()

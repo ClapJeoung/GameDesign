@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Interactable
   - Recharge
+  - Torch
   layers:
   - Default
   - TransparentFX
@@ -16,8 +17,8 @@ TagManager:
   - Wall
   - Upper
   - Water
-  - 
-  - 
+  - Wooden
+  - Breakable
   - 
   - 
   - 
