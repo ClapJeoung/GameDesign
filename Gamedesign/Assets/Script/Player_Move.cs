@@ -23,7 +23,8 @@ public class Player_Move : MonoBehaviour
   [SerializeField] private float MaxJumpTime = 0.6f;  //최대 점프 시간
 
   [SerializeField] private TMPro.TextMeshProUGUI asdf = null;
-
+  private int Conveyor = 0; //-1 / 0 / +1   좌측 X 우측
+  [SerializeField] private float ConveyorSpeed = 3.0f;  //컨베이어벨트 위 속도
   private void Awake()
   {
     Setup();
@@ -57,15 +58,16 @@ public class Player_Move : MonoBehaviour
     else Accel.x = (Velocity.x != 0 ? Mathf.Sign(Velocity.x) : 0) * AccelResist;//아무것도 안 누름 : 가속도가 속도 반대로
 
 
-    if (Input.GetKey(KeyCode.Space)&&Jumpable) { Velocity.y = JumpPower;JumpTime += Time.deltaTime; }
+    if (Input.GetKey(KeyCode.Space)&&Jumpable) { Velocity.y = JumpPower;JumpTime += Time.deltaTime; }//점프
 
 
 
-    Velocity += Accel * Time.deltaTime;
+    Velocity += Accel * Time.deltaTime; //속도에 가속추가
 
-    Velocity = new Vector2(Mathf.Clamp(Velocity.x,-MaxXSpeed,MaxXSpeed), Mathf.Clamp(Velocity.y,-MaxYSpeed,MaxYSpeed));
-    Velocity = new Vector2(Mathf.Abs(Velocity.x) < 0.35f ? 0 : Velocity.x, Mathf.Abs(Velocity.y) < 0.15f ? 0 : Velocity.y);
-    asdf.text = Velocity.ToString();
+    Velocity = new Vector2(Mathf.Clamp(Velocity.x,-MaxXSpeed,MaxXSpeed), Mathf.Clamp(Velocity.y,-MaxYSpeed,MaxYSpeed)); //속도 제한치
+    Velocity +=Vector2.right* ConveyorSpeed * Conveyor; //컨베이어벨트 값 추가
+    Velocity = new Vector2(Mathf.Abs(Velocity.x) < 0.35f ? 0 : Velocity.x, Mathf.Abs(Velocity.y) < 0.25f ? 0 : Velocity.y); //미세 떨림 없게
+    asdf.text = Velocity.ToString();  //디버그용 텍스트
     RaycastVertical();
     RaycastHorizontal();
 
@@ -79,34 +81,21 @@ public class Player_Move : MonoBehaviour
     int _layermask;          //레이어마스크(int)
     float _distance = Mathf.Abs( Velocity.y) * Time.deltaTime;                //선이 발사되는 거리
     RaycastHit2D _hit;                                            //선이 발사되고 닿은 곳의 정보
+    Conveyor = 0; //컨베이어 초기화
 
     for (int i = 0; i < VertexCount; i++)
     {
-      _layermask = 1 << LayerMask.NameToLayer("Wall");  //벽 검사
+      _layermask = 1 << LayerMask.NameToLayer("Wall");  //벽 역할을 하는 레이어 검사
       _newpos = MyTransform.position + (Vector3)_pos[i];
       _hit = Physics2D.Raycast(_newpos, _dir, _distance, _layermask) ;
       if (_hit.transform != null)
       {
         if (Velocity.y < 0) { Jumpable = true; JumpTime = 0.0f; }
         Velocity.y = Mathf.Abs(_hit.distance) > 0.11f ? (_hit.distance - 0.1f)*_dir.y : 0;
-        break;
-      }
-      _layermask = 1 << LayerMask.NameToLayer("Wooden");  //목재 검사
-      _hit = Physics2D.Raycast(_newpos, _dir, _distance, _layermask);
-      if (_hit.transform != null)
-      {
-        if (Velocity.y < 0) { Jumpable = true; JumpTime = 0.0f; }
-        Velocity.y = Mathf.Abs(_hit.distance) > 0.11f ? (_hit.distance - 0.1f) * _dir.y : 0;
-        break;
-      }
 
-      _layermask = 1 << LayerMask.NameToLayer("Breakable");  //밟아서 부숴지는거 검사
-      _hit = Physics2D.Raycast(_newpos, _dir, _distance, _layermask);
-      if (_hit.transform != null)
-      {
-        if (Velocity.y < 0) { Jumpable = true; JumpTime = 0.0f; }
-        Velocity.y = Mathf.Abs(_hit.distance) > 0.11f ? (_hit.distance - 0.1f) * _dir.y : 0;
-        _hit.transform.GetComponent<Breakable>().Pressed(); //밟아서 부숴지는 이벤트 실행
+        if (transform.CompareTag("Breakable")) _hit.transform.GetComponent<Breakable>().Pressed(); //밟아서 부숴지는 이벤트 실행
+        else if (transform.CompareTag("Conveyor_R")) Conveyor = 1;
+        else if (transform.CompareTag("Conveyor_L")) Conveyor = -1;
         break;
       }
 
@@ -142,28 +131,6 @@ public class Player_Move : MonoBehaviour
       if (_hit.transform != null)
       {
         Velocity.x =Mathf.Abs(_hit.distance)>0.11f? (_hit.distance - 0.1f)*_dir.x : 0;
-        break;
-      }
-      _layermask = 1 << LayerMask.NameToLayer("Wooden");  //목재 검사
-      _hit = Physics2D.Raycast(_newpos, _dir, _distance, _layermask);
-      if (_hit.transform != null)
-      {
-        Velocity.x = Mathf.Abs(_hit.distance) > 0.11f ? (_hit.distance - 0.1f) * _dir.x : 0;
-        break;
-      }
-      _layermask = 1 << LayerMask.NameToLayer("Upper");  //윗블록 검사
-      _hit = Physics2D.Raycast(_newpos, _dir, _distance, _layermask);
-      if (_hit.transform != null)
-      {
-        Velocity.x = Mathf.Abs(_hit.distance) > 0.11f ? (_hit.distance - 0.1f) * _dir.x : 0;
-        break;
-      }
-
-      _layermask = 1 << LayerMask.NameToLayer("Breakable");  //밟아서 부숴지는거 검사, 이벤트 호출은 안함
-      _hit = Physics2D.Raycast(_newpos, _dir, _distance, _layermask);
-      if (_hit.transform != null)
-      {
-        Velocity.x = Mathf.Abs(_hit.distance) > 0.11f ? (_hit.distance - 0.1f) * _dir.x : 0;
         break;
       }
       Debug.DrawRay(_newpos, _dir, Color.red, _distance);

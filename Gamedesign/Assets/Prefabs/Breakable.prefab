@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8033387368112126747}
   - component: {fileID: 8033387368112126745}
   - component: {fileID: 8033387368112126744}
-  m_Layer: 10
+  m_Layer: 6
   m_Name: 0_dust
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -667,7 +667,7 @@ ParticleSystem:
     boxThickness: {x: 0, y: 0, z: 0}
     radiusThickness: 1
     donutRadius: 0.2
-    m_Position: {x: 0, y: 0.46, z: 0}
+    m_Position: {x: 0, y: -0.5, z: 0}
     m_Rotation: {x: 0, y: 0, z: -180}
     m_Scale: {x: 1, y: 1, z: 1}
     placementMode: 0
@@ -4824,9 +4824,9 @@ GameObject:
   - component: {fileID: 8033387368260894257}
   - component: {fileID: 8033387368260894262}
   - component: {fileID: 8033387368260894263}
-  m_Layer: 10
+  m_Layer: 6
   m_Name: Breakable
-  m_TagString: Untagged
+  m_TagString: Breakable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4957,7 +4957,7 @@ GameObject:
   - component: {fileID: 8033387368522467282}
   - component: {fileID: 8033387368522467280}
   - component: {fileID: 8033387368522467283}
-  m_Layer: 10
+  m_Layer: 6
   m_Name: 2_restore
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9827,7 +9827,7 @@ GameObject:
   - component: {fileID: 8033387368560015422}
   - component: {fileID: 8033387368560015420}
   - component: {fileID: 8033387368560015423}
-  m_Layer: 10
+  m_Layer: 6
   m_Name: 1_destroy
   m_TagString: Untagged
   m_Icon: {fileID: 0}

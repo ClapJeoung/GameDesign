@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6637071511631399616}
   - component: {fileID: 6637071511631399623}
   - component: {fileID: 6637071511631399622}
-  m_Layer: 9
+  m_Layer: 6
   m_Name: WoodPrefab_0
   m_TagString: Interactable
   m_Icon: {fileID: 0}
@@ -152,7 +152,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6637071511850266525}
   - component: {fileID: 6637071511850266524}
-  m_Layer: 9
+  m_Layer: 6
   m_Name: Light 2D
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -263,7 +263,7 @@ GameObject:
   - component: {fileID: 6637071512122080843}
   - component: {fileID: 6637071512122080837}
   - component: {fileID: 6637071512122080836}
-  m_Layer: 9
+  m_Layer: 6
   m_Name: 0_smoke
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5074,7 +5074,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6637071512345937126}
   - component: {fileID: 6637071512345937127}
-  m_Layer: 9
+  m_Layer: 6
   m_Name: firemask
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5157,7 +5157,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6637071512576541713}
   - component: {fileID: 6637071512576541714}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: fire
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5242,7 +5242,7 @@ GameObject:
   - component: {fileID: 6637071512625528568}
   - component: {fileID: 6637071512625528570}
   - component: {fileID: 6637071512625528569}
-  m_Layer: 9
+  m_Layer: 6
   m_Name: 1_burning
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10054,7 +10054,7 @@ GameObject:
   - component: {fileID: 6637071513036917088}
   - component: {fileID: 6637071513036917094}
   - component: {fileID: 6637071513036917095}
-  m_Layer: 9
+  m_Layer: 6
   m_Name: 2_fire
   m_TagString: Untagged
   m_Icon: {fileID: 0}
