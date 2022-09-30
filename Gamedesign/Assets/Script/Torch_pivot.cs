@@ -16,11 +16,11 @@ public class Torch_pivot : MonoBehaviour
   private bool IsPressing_R = false;
   private bool IsPressing_L = false;
   [SerializeField] private float ParticleLength;
-  [SerializeField] private Transform ParticleTransform;
   [SerializeField] private float FireLength;
   [SerializeField] private Transform ColliderTransform;
   [SerializeField] private Transform FireTransform;
-  private void Awake()
+  private bool IsDead = false;
+  private void Start()
   {
     Setup();
   }
@@ -28,8 +28,10 @@ public class Torch_pivot : MonoBehaviour
   {
     MyTrans = transform;
   }
+  public void Dead() => IsDead = true;
   private void Update()
   {
+    if (IsDead) return;
     int _dir = CurrentRadius>0&& CurrentRadius < 180.0f ? 1 : -1;
     Accel= Radgravity *_dir;
     int _radius = (int)CurrentRadius / 45;
@@ -48,7 +50,6 @@ public class Torch_pivot : MonoBehaviour
     CurrentRadius = CurrentRadius < -180.0f ? CurrentRadius + 360.0f : CurrentRadius;
     
     MyTrans.localPosition = new Vector3(Length * Mathf.Cos((CurrentRadius+90.0f) * Mathf.Deg2Rad), Length * Mathf.Sin((CurrentRadius+90.0f) * Mathf.Deg2Rad), -1.0f);
-    ParticleTransform.localPosition= new Vector3(ParticleLength * Mathf.Cos((CurrentRadius + 90.0f) * Mathf.Deg2Rad), ParticleLength * Mathf.Sin((CurrentRadius + 90.0f) * Mathf.Deg2Rad), -1.0f);
     FireTransform.localPosition = new Vector3(FireLength * Mathf.Cos((CurrentRadius + 90.0f) * Mathf.Deg2Rad), FireLength * Mathf.Sin((CurrentRadius + 90.0f) * Mathf.Deg2Rad), -1.0f);
     ColliderTransform.localPosition = new Vector3(FireLength * Mathf.Cos((CurrentRadius + 90.0f) * Mathf.Deg2Rad), FireLength * Mathf.Sin((CurrentRadius + 90.0f) * Mathf.Deg2Rad), -1.0f);
     MyTrans.eulerAngles = new Vector3(0, 0, CurrentRadius);

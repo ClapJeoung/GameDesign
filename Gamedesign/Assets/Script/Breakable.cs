@@ -17,7 +17,7 @@ public class Breakable : MonoBehaviour
   public void Pressed() //밟혔을때
   {
     if (IsActive) return;
-
+    Debug.Log("Pressed");
     DustParticle.Play();
     IsActive = true;
     StartCoroutine(DestroyCoroutine());
@@ -52,7 +52,7 @@ public class Breakable : MonoBehaviour
       MySpr.color = MyAlpha;
       yield return null;
     }
-    gameObject.layer = LayerMask.NameToLayer("Breakable");  //레이어 복구로 다시 발판 역할 가능하게
+    gameObject.layer = LayerMask.NameToLayer("Wall");  //레이어 복구로 다시 발판 역할 가능하게
 
     IsActive = false; //다시 밟혀서 부숴질 수 있도록 변수 초기화
   }

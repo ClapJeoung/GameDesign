@@ -4822,8 +4822,8 @@ GameObject:
   m_Component:
   - component: {fileID: 8033387368260894256}
   - component: {fileID: 8033387368260894257}
-  - component: {fileID: 8033387368260894262}
   - component: {fileID: 8033387368260894263}
+  - component: {fileID: 4318726249252753547}
   m_Layer: 6
   m_Name: Breakable
   m_TagString: Breakable
@@ -4901,25 +4901,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &8033387368260894262
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8033387368260894260}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 00fcb104a9142c84f812b370560fd57a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  DustParticle: {fileID: 8033387368112126745}
-  DestroyParticle: {fileID: 8033387368560015420}
-  RestoreParticle: {fileID: 8033387368522467280}
-  MySpr: {fileID: 8033387368260894257}
-  WaitTime: 1
-  DestroyTime: 0.25
-  RestoreTIme: 5
 --- !u!61 &8033387368260894263
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -4946,6 +4927,25 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &4318726249252753547
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8033387368260894260}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00fcb104a9142c84f812b370560fd57a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DustParticle: {fileID: 8033387368112126745}
+  DestroyParticle: {fileID: 8033387368560015420}
+  RestoreParticle: {fileID: 8033387368522467280}
+  MySpr: {fileID: 8033387368260894257}
+  WaitTime: 1
+  DestroyTime: 0.3
+  RestoreTIme: 5
 --- !u!1 &8033387368522467281
 GameObject:
   m_ObjectHideFlags: 0

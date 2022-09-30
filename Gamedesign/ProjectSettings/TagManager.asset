@@ -8,6 +8,9 @@ TagManager:
   - Recharge
   - Torch
   - Breakable
+  - Conveyor_L
+  - Conveyor_R
+  - Water
   layers:
   - Default
   - TransparentFX

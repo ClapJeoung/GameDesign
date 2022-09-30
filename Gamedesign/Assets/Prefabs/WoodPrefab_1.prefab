@@ -4916,8 +4916,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5762a3e04b7246342b23dc83c8035f19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RequireTime: 5
-  IgniteTime: 0.3
+  RequireTime: 4
+  IgniteTime: 0.4
   MySpr: {fileID: 6620329062525758814}
   FireTransform: {fileID: 6620329062673650998}
   SmokeParticle: {fileID: 6620329062186030544}
