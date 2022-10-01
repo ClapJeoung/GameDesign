@@ -4967,7 +4967,7 @@ GameObject:
   - component: {fileID: 7950567348409872909}
   - component: {fileID: 7950567348409872908}
   m_Layer: 0
-  m_Name: Lamp
+  m_Name: Lamp_save
   m_TagString: Interactable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5008,6 +5008,7 @@ MonoBehaviour:
   RequireTime: 3
   BasicParticle: {fileID: 7950567349709144495}
   FiredParticle: {fileID: 7950567348288962325}
+  Ignitable: 1
   MyLight: {fileID: 7950567349787878303}
 --- !u!212 &7950567348409872909
 SpriteRenderer:

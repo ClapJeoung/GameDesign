@@ -40,6 +40,12 @@ public class Player_Move : MonoBehaviour
   [SerializeField] private int ShakeCount = 55;
   [SerializeField] private float ShakeTime = 4.0f;
   [SerializeField] private float ShakeDegree = 0.05f;
+  [Space(5)]
+  private Transform WaterDownTrans = null;
+  private ParticleSystem WaterDownParticle = null;
+  private Transform WaterUpTrans = null;
+  private ParticleSystem WaterUpParticle = null;
+
   public void Setup()
   {
     MyTransform = transform;
@@ -60,6 +66,8 @@ public class Player_Move : MonoBehaviour
       Vertex_right[i] = new Vector2(_width / 2, -_height / 2 + _size_height * i);
       Vertex_left[i] = new Vector2(-_width / 2, -_height / 2 + _size_height * i);
     }
+
+    GameManager.Instance.GetWaterParticle(out WaterDownTrans, out WaterDownParticle, out WaterUpTrans, out WaterUpParticle);
   }
   public void Start()
   {
@@ -118,7 +126,7 @@ public class Player_Move : MonoBehaviour
       {
         if (Velocity.y < 0) { Jumpable = true; JumpTime = 0.0f; }
         Velocity.y =_hit.distance*_dir.y;
-        Debug.Log(_hit.transform.tag);
+  //      Debug.Log(_hit.transform.tag);
         if (_hit.transform.CompareTag("Breakable"))
           _hit.transform.GetComponent<Breakable>().Pressed(); //밟아서 부숴지는 이벤트 실행
         else if (_hit.transform.CompareTag("Conveyor_R")) Conveyor = 1;
@@ -166,11 +174,21 @@ public class Player_Move : MonoBehaviour
   }
   private void OnTriggerEnter2D(Collider2D collision)
   {
-    if (collision.CompareTag("Water")) { Velocity.y = 0.0f; IsWater = true; WaterAccel = 180.0f; Jumpable = true;Debug.Log("들어간레후~"); }
+    if (collision.gameObject.layer ==  LayerMask.NameToLayer("Water"))
+    {
+      Velocity.y = 0.0f; IsWater = true; WaterAccel = 180.0f; Jumpable = true;
+      WaterDownTrans.position = MyTransform.position + Vector3.down * 0.5f;
+      WaterDownParticle.Play();
+    }
   }
   private void OnTriggerExit2D(Collider2D collision)
   {
-    if (collision.CompareTag("Water")) { IsWater = false; Debug.Log("나간레후~"); }
+    if (collision.gameObject.layer ==LayerMask.NameToLayer("Water"))
+    {
+      IsWater = false;
+      WaterUpTrans.position = MyTransform.position + Vector3.down * 0.5f;
+      WaterUpParticle.Play();
+    }
   }
   private void Update()
   {

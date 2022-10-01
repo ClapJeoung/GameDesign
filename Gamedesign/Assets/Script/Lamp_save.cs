@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.U2D;
 using UnityEngine.Rendering.Universal;
 
-public class Intr_Lamp :MonoBehaviour, Interactable   //램프의 스크립트
+public class Lamp_save :MonoBehaviour, Interactable   //램프의 스크립트
 {
   [SerializeField] private bool IsFired = false;      //켜져 있는 램프인지
   [SerializeField] private float RequireTime = 2.0f;  //점화에 걸리는 시간
@@ -38,7 +38,7 @@ public class Intr_Lamp :MonoBehaviour, Interactable   //램프의 스크립트
       gameObject.tag = "Recharge";
     }
   }
-  private void Awake()
+  private void Start()
   {
     Setup();
   }
