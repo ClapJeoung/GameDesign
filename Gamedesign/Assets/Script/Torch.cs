@@ -18,9 +18,11 @@ public class Torch : MonoBehaviour
   [SerializeField] private float MaxIntensity = 2.5f; //최대밝기
   [SerializeField] private float MaxSize = 1.2f;      //최대크기
   [SerializeField] private Transform ParticleTransform = null;    //파티클 트랜스폼
-  [SerializeField] private ParticleSystem IdleParticle = null;  //기본 파티클
-  [SerializeField] private ParticleSystem ChargedParticle = null;//풀차지 파티클
-  [SerializeField] private ParticleSystem SmokeParticle = null; //사망 파티클
+  [SerializeField] private int IdleParticleCount = 10;
+  private ParticleSystem IdleParticle = null;  //기본 파티클
+  private ParticleSystem.EmissionModule IdleParticle_emmision;
+  private ParticleSystem ChargedParticle = null;//풀차지 파티클
+  private ParticleSystem SmokeParticle = null; //사망 파티클
   private float firepower = 1.0f;//불 에너지
   public float FirePower
   {
@@ -34,16 +36,23 @@ public class Torch : MonoBehaviour
       else if (value >= 1.0f && firepower < 1.0f) ChargedParticle.Play();
     }
   }
-  private void Awake()
+  private void Start()
   {
     Setup();
   }
   public void Setup()
   {
     MyCol = GetComponent<CircleCollider2D>();
+    ParticleSystem[] particles = GameManager.Instance.GetPlayerParticles();
+    IdleParticle = particles[0];
+    IdleParticle_emmision = IdleParticle.emission;
+    ChargedParticle= particles[1];
+    SmokeParticle = particles[2];
   }
   private void OnTriggerEnter2D(Collider2D collision)
   {
+    if(FirePower <= 0.0f) return;
+
     if (collision.CompareTag("Interactable")) collision.GetComponent<Interactable>().FireUp();
     else if (collision.CompareTag("Recharge")) IsRecharging = true;
     else if (collision.CompareTag("Water"))
@@ -71,6 +80,7 @@ public class Torch : MonoBehaviour
     FireSpr.color = FireAlpha;                                    //FirePower에 비례해 투명도 조절
     MyLight.intensity = Mathf.Lerp(0.0f, MaxIntensity, FirePower);  //FirePower에 비례해 밝기 조절
     MyLight.pointLightOuterRadius = Mathf.Lerp(0.0f, MaxSize, FirePower); //FirePower에 비례해 크기 조절
-    ParticleTransform.localScale=Vector3.one* Mathf.Lerp(0.0f, 1.0f, FirePower); //파티클의 트랜스폼 크기 자체를 조절
+                                                                          //  ParticleTransform.localScale=Vector3.one* Mathf.Lerp(0.0f, 1.0f, FirePower); //파티클의 트랜스폼 크기 자체를 조절
+    IdleParticle_emmision.rateOverTime = Mathf.Lerp(0, IdleParticleCount, firepower);
   }
 }

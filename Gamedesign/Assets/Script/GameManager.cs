@@ -12,6 +12,9 @@ public class GameManager : MonoBehaviour
   [Space(5)]
   [SerializeField] private GameObject WaterDown = null;
   [SerializeField] private GameObject WaterUp = null;
+  [Space(5)]
+  [SerializeField] private ParticleSystem[] PlayerParticles = null;
+  [SerializeField] private Transform[] ParticleTransforms = null;
   private Transform MyPlayer = null;
   private void Awake()
   {
@@ -43,4 +46,6 @@ public class GameManager : MonoBehaviour
     wateruptrans = WaterUp.transform;
     wateruppar = WaterUp.GetComponent<ParticleSystem>();
   }
+  public ParticleSystem[] GetPlayerParticles() { return PlayerParticles; }
+  public Transform[] GetPlayerParticleTransforms() { return ParticleTransforms; }
 }

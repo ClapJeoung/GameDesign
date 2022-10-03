@@ -19,6 +19,12 @@ public class Torch_pivot : MonoBehaviour
   [SerializeField] private float FireLength;
   [SerializeField] private Transform ColliderTransform;
   [SerializeField] private Transform FireTransform;
+  private ParticleSystem Particle_0 = null;
+   private ParticleSystem.ShapeModule Particle_0_shape;
+  private ParticleSystem Particle_1 = null;
+  private ParticleSystem.ShapeModule Particle_1_shape;
+   private ParticleSystem Particle_2 = null;
+  private ParticleSystem.ShapeModule Particle_2_shape;
   private bool IsDead = false;
   private void Start()
   {
@@ -27,6 +33,14 @@ public class Torch_pivot : MonoBehaviour
   public void Setup()
   {
     MyTrans = transform;
+    ParticleSystem[] particles = GameManager.Instance.GetPlayerParticles();
+    Particle_0= particles[0];
+    Particle_1= particles[1];
+    Particle_2= particles[2];
+    Particle_0_shape = Particle_0.shape;
+    Particle_1_shape = Particle_1.shape;
+    Particle_2_shape = Particle_2.shape;
+    if(!Particle_0.isPlaying)particles[0].Play();
   }
   public void Dead() => IsDead = true;
   private void Update()
@@ -48,11 +62,17 @@ public class Torch_pivot : MonoBehaviour
     CurrentRadius += RadiusVelocity * Time.deltaTime;
     CurrentRadius = CurrentRadius > 180.0f ? CurrentRadius - 360.0f : CurrentRadius;
     CurrentRadius = CurrentRadius < -180.0f ? CurrentRadius + 360.0f : CurrentRadius;
+
+    Vector3 _firepos = new Vector3(Mathf.Cos((CurrentRadius + 90.0f) * Mathf.Deg2Rad), Mathf.Sin((CurrentRadius + 90.0f) * Mathf.Deg2Rad));
     
-    MyTrans.localPosition = new Vector3(Length * Mathf.Cos((CurrentRadius+90.0f) * Mathf.Deg2Rad), Length * Mathf.Sin((CurrentRadius+90.0f) * Mathf.Deg2Rad), -1.0f);
-    FireTransform.localPosition = new Vector3(FireLength * Mathf.Cos((CurrentRadius + 90.0f) * Mathf.Deg2Rad), FireLength * Mathf.Sin((CurrentRadius + 90.0f) * Mathf.Deg2Rad), -1.0f);
-    ColliderTransform.localPosition = new Vector3(FireLength * Mathf.Cos((CurrentRadius + 90.0f) * Mathf.Deg2Rad), FireLength * Mathf.Sin((CurrentRadius + 90.0f) * Mathf.Deg2Rad), -1.0f);
+    MyTrans.localPosition = new Vector3(Length * _firepos.x, Length * _firepos.y, -1.0f);
+    FireTransform.localPosition = new Vector3(FireLength * _firepos.x, FireLength * _firepos.y, -1.0f);
+    ColliderTransform.localPosition = new Vector3(FireLength * _firepos.x, FireLength * _firepos.y, -1.0f);
     MyTrans.eulerAngles = new Vector3(0, 0, CurrentRadius);
+
+    Particle_0_shape.position = FireTransform.position;
+    Particle_1_shape.position = FireTransform.position;
+    Particle_2_shape.position = FireTransform.position;
   }
   private void AddTorchForce(int rad, int dir)
   {

@@ -132,9 +132,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 61
+        y: 64
         width: 64
-        height: 61
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -153,9 +153,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 64
-        y: 61
+        y: 64
         width: 64
-        height: 61
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -176,7 +176,7 @@ TextureImporter:
         x: 0
         y: 0
         width: 64
-        height: 61
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -197,7 +197,7 @@ TextureImporter:
         x: 64
         y: 0
         width: 64
-        height: 61
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -224,6 +224,7 @@ TextureImporter:
     nameFileIdTable:
       Tile_temp_0: 281599388
       Tile_temp_1: -208678474
+      Tile_temp_4: 906958182
       Tile_temp_3: 942224622
       Tile_temp_2: 1708552292
   spritePackingTag: 
