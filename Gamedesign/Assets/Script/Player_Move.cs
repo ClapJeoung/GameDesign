@@ -124,9 +124,14 @@ public class Player_Move : MonoBehaviour
       _hit = Physics2D.Raycast(_newpos, _dir, _distance, _layermask) ;
       if (_hit.transform != null)
       {
+        var iswooden=new Wooden();
+        if (_hit.transform.TryGetComponent<Wooden>(out iswooden) && !iswooden.IsActive) continue; //목재 비활성화면 무시
+
         if (Velocity.y < 0) { Jumpable = true; JumpTime = 0.0f; }
+
         Velocity.y =_hit.distance*_dir.y;
   //      Debug.Log(_hit.transform.tag);
+
         if (_hit.transform.CompareTag("Breakable"))
           _hit.transform.GetComponent<Breakable>().Pressed(); //밟아서 부숴지는 이벤트 실행
         else if (_hit.transform.CompareTag("Conveyor_R")) Conveyor = 1;
@@ -165,6 +170,9 @@ public class Player_Move : MonoBehaviour
       _hit = Physics2D.Raycast(_newpos, _dir, _distance, _layermask);
       if (_hit.transform != null)
       {
+        var iswooden = new Wooden();
+        if (_hit.transform.TryGetComponent<Wooden>(out iswooden) && !iswooden.IsActive) continue; //목재 비활성화면 무시
+
         Velocity.x =_hit.distance - 0.1f*_dir.x ;
         break;
       }

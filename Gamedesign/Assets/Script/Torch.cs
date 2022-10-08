@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.U2D;
 using UnityEngine.Rendering.Universal;
 
+public enum Dimension { A, B }
 public class Torch : MonoBehaviour
 {
   private CircleCollider2D MyCol = null;  //원형 콜라이더
@@ -36,6 +37,7 @@ public class Torch : MonoBehaviour
       else if (value >= 1.0f && firepower < 1.0f) ChargedParticle.Play();
     }
   }
+  private Dimension MyDimension = Dimension.A;
   private void Start()
   {
     Setup();
@@ -71,6 +73,7 @@ public class Torch : MonoBehaviour
   }
   private void Update()
   {
+    return;
     if (FirePower <= 0) return;
     if (IsRecharging) FirePower += Time.deltaTime / RechargeTime; //충전중이면 쭉 증가
     else FirePower-=Time.deltaTime/ ExtinguishTime;               //그 외라면 쭉 감소

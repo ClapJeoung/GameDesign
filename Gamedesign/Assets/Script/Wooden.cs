@@ -8,8 +8,8 @@ public class Wooden : MonoBehaviour,Interactable
   [SerializeField] private float RequireTime = 2.0f; //다 타는데 필요한 시간
  [Range(0.0f,1.0f)] [SerializeField] private float IgniteTime = 0.5f; //발화가 진행되는 순간 (0~1)
   private float Progress = 0.0f;                    //현재 진척도
-  private bool IsActive = true;                    //활성화된 목재인지
- [SerializeField] private SpriteRenderer MySpr = null;              //내 스프라이트랜더러
+  [SerializeField] private SpriteRenderer Spr_A = null; //일반 상태 이미지
+  [SerializeField] private SpriteRenderer Spr_B = null; //다른 차원 이미지
   [SerializeField] private Transform FireTransform = null;//화염 이미지 트랜스폼
   private bool IsFired = false;                     //불이 올라와있는지
   [SerializeField] private ParticleSystem SmokeParticle = null;//검은 연기 파티클
@@ -22,8 +22,29 @@ public class Wooden : MonoBehaviour,Interactable
   [SerializeField] private float FireSize = 2.0f;
   [SerializeField] private Light2D MyLight = null;
   [SerializeField] private float MaxLightOuter = 2.0f;
+  [SerializeField] private Dimension MyDimension;
+  private bool isactive = true;
+  public bool IsActive
+  {
+    get { if (GameManager.Instance.WorldDimension == Dimension.A) //월드가 A 차원일때
+      {
+        if (MyDimension == Dimension.A ) return true; //나도 A면 활성화
+
+        return false; //아니면 비활성화
+      }
+    else if (GameManager.Instance.WorldDimension == Dimension.B)  //월드가 B 차원일때
+      {
+        if (MyDimension == Dimension.B) return true; //나도 B면 활성화
+
+        return false; //아니면 비활성화
+      }
+      return true;
+    }
+    set { isactive = value; }
+  }
   public void FireUp()
   {
+    if (!IsActive) return;
     IsFired = true;
     StartCoroutine(smokecoroutine());
   }
@@ -38,6 +59,7 @@ public class Wooden : MonoBehaviour,Interactable
   }
   public void FireDown()
   {
+    if (!IsActive) return;
     IsFired = false;
     StopAllCoroutines();
     if (SmokeParticle.isPlaying) SmokeParticle.Stop();
@@ -50,7 +72,7 @@ public class Wooden : MonoBehaviour,Interactable
   {
     if (!IsActive) return;  //!IsActive면 다 탔다는 뜻
 
-    if ((Progress / RequireTime) < IgniteTime)  //점화 시작 비율 이전
+    if ((Progress / RequireTime) < IgniteTime)  //연기가 나는 수준
     {
      if(IsFired) Progress+=Time.deltaTime;  //불이 있으면 진행도 증가
      else Progress-= Time.deltaTime;        //불이 없으면 진행도 감소
@@ -59,10 +81,10 @@ public class Wooden : MonoBehaviour,Interactable
       if ((Progress / RequireTime) >= IgniteTime) //Ignite 임계점 넘어서면
       {
         TargetTorchPos = Vector2.Lerp(CurrentTorchPos, transform.position, 0.5f);  //TargetTorchPos에 값 할당
-        FireTransform.gameObject.SetActive(true); //불 이미지 활성화
-        FireTransform.position = TargetTorchPos;  //불 위치 설정
-        FireTransform.localScale = Vector3.zero;  //불 크기 초기값(0) 설정
-        MaskTransform.position = TargetTorchPos;
+     //   FireTransform.gameObject.SetActive(true); //불 이미지 활성화
+     //   FireTransform.position = TargetTorchPos;  //불 위치 설정
+     //   FireTransform.localScale = Vector3.zero;  //불 크기 초기값(0) 설정
+     //   MaskTransform.position = TargetTorchPos;
         SmokeParticle.Stop();                     //검은연기 파티클 종료
         BurningParticle.transform.position = TargetTorchPos; //불타는 파티클 위치 설정
         BurningParticle.Play();                   //불타는 파티클 실행
@@ -72,21 +94,21 @@ public class Wooden : MonoBehaviour,Interactable
      return;
     }
     
-    if ((Progress / RequireTime) >= IgniteTime)//점화 시작 비율 이후
+    if ((Progress / RequireTime) >= IgniteTime)//불이 붙는 수준
     {
       Progress += Time.deltaTime; //불이 있든 없든 계속 불탐
 
-      FireTransform.localScale = Vector3.one * Mathf.Lerp(0, FireSize, ((Progress / RequireTime) - IgniteTime)/(1-IgniteTime));
+    //  FireTransform.localScale = Vector3.one * Mathf.Lerp(0, FireSize, ((Progress / RequireTime) - IgniteTime)/(1-IgniteTime));
       MyLight.pointLightOuterRadius=MaxLightOuter* ((Progress / RequireTime) - IgniteTime) / (1 - IgniteTime);
       //Ignitetime ~ 1을 0 ~ 1로 변환시키고 크기에 대입
 
       if (Progress >= RequireTime) //점화 수치 최대
       {
         BurningParticle.Stop();
-        gameObject.layer = 0; //게임오브젝트 레이어 제거
-        MySpr.color = Color.gray;
+        if (MyDimension == Dimension.A) { Spr_A.enabled = false; Spr_B.enabled = true; MyDimension = Dimension.B; }
+        else if (MyDimension == Dimension.B) { Spr_B.enabled = false; Spr_A.enabled = true; MyDimension = Dimension.A; }
+        Progress = 0.0f;
         StartCoroutine(burningcoroutine());
-        IsActive = false;
       }
     }
   }
@@ -95,13 +117,13 @@ public class Wooden : MonoBehaviour,Interactable
     float _time = 0.0f;
     float _firetime = 0.1f;
     FiredParticle.Play();
-    while (_time < _firetime)
+  /*  while (_time < _firetime)
     {
       _time += Time.deltaTime;
       MaskTransform.localScale = Vector3.one * Mathf.Lerp(0, FireSize, _time / _firetime); //마지막 불까지 다 태웠으면
       yield return null;
     }
-    _time = 0.0f;
+    _time = 0.0f; */
     while (_time < _firetime)
     {
       _time += Time.deltaTime;
@@ -109,17 +131,11 @@ public class Wooden : MonoBehaviour,Interactable
       yield return null;
     }
 
-    yield return new WaitForSeconds(0.4f);
-
-    for (int i = 0; i < transform.childCount; i++)
-    {
-      transform.GetChild(i).gameObject.SetActive(false);
-    }
-    gameObject.tag = "Untagged";
-    this.enabled = false;  //자식 객체 전부 비활성화하고 스크립트도 비활성화
   }
   public void Setup()
   {
+    if (MyDimension == Dimension.A) Spr_B.enabled = false;
+    else if(MyDimension== Dimension.B) Spr_A.enabled = false;  
   }
   private void Awake()
   {

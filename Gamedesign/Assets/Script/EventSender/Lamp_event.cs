@@ -8,7 +8,7 @@ public class Lamp_event : MonoBehaviour, Interactable
   [SerializeField] private float RequireTime = 3.0f;  //점화에 걸리는 시간
   private float Progress = 0.0f;                      //불이 붙여진 시간
   private SpriteRenderer MySpr = null;                //스프라이트렌더러
-  private Transform MyTransform = null;               //트랜스폼
+  private Transform MyTransform = null;               //트랜스폼(불)
   [SerializeField] private ParticleSystem BasicParticle = null;        //파티클-기본
   [SerializeField] private ParticleSystem FiredParticle = null;        //점화완료 파티클
   private bool Ignited = false;                       //지금 불이 붙었는지
@@ -16,6 +16,8 @@ public class Lamp_event : MonoBehaviour, Interactable
   private Color CurrentColor = Color.white;           //투명도를 조절할 변수
   [SerializeField] private Light2D MyLight;           //조명
   [SerializeField] private EventTarget MyEventTarget=null;
+  private enum LampType { Open, Close };
+  [SerializeField] private LampType MyLampType;
   public void Setup()
   {
     MyTransform = transform.GetChild(0).transform;
@@ -51,7 +53,12 @@ public class Lamp_event : MonoBehaviour, Interactable
     //진행도가 음수까지 떨어지면 이쯤에서 시마이
 
     if (Progress > RequireTime)
-    { Progress = RequireTime; FiredParticle.Play(); Ignitable = false; MyEventTarget.Active(); }  //진행도가 최대치로 증가하면 끝
+    {
+      Progress = RequireTime; FiredParticle.Play(); Ignitable = false;
+      // MyEventTarget.Active(); 
+      if(MyLampType==LampType.Open) GameManager.Instance.OpenMask(MyTransform.position);
+      else if(MyLampType==LampType.Close) GameManager.Instance.CloseMask(MyTransform.position);
+    }  //진행도가 최대치로 증가하면 끝
 
     MyTransform.localScale = Vector3.one * Mathf.Pow((Progress / RequireTime), 2);  //진행도에 비례해 크기 증가
     CurrentColor.a = Mathf.Sqrt(Progress / RequireTime);              //진행도의 루트 그래프 비율로 투명도 증가

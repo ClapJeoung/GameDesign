@@ -16,6 +16,8 @@ public class GameManager : MonoBehaviour
   [SerializeField] private ParticleSystem[] PlayerParticles = null;
   [SerializeField] private Transform[] ParticleTransforms = null;
   private Transform MyPlayer = null;
+  [SerializeField] private FIreMask MyMask = null;
+  [HideInInspector] public Dimension WorldDimension = Dimension.A;
   private void Awake()
   {
     if (instance == null) instance = this;
@@ -48,4 +50,7 @@ public class GameManager : MonoBehaviour
   }
   public ParticleSystem[] GetPlayerParticles() { return PlayerParticles; }
   public Transform[] GetPlayerParticleTransforms() { return ParticleTransforms; }
+
+  public void OpenMask(Vector2 newpos) { MyMask.Open(newpos); WorldDimension = Dimension.B; }
+  public void CloseMask(Vector2 newpos) { MyMask.Close(newpos); WorldDimension = Dimension.A; }
 }
