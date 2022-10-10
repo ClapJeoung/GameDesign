@@ -108,6 +108,7 @@ public class Wooden : MonoBehaviour,Interactable
         if (MyDimension == Dimension.A) { Spr_A.enabled = false; Spr_B.enabled = true; MyDimension = Dimension.B; }
         else if (MyDimension == Dimension.B) { Spr_B.enabled = false; Spr_A.enabled = true; MyDimension = Dimension.A; }
         Progress = 0.0f;
+        IsFired = false;
         StartCoroutine(burningcoroutine());
       }
     }

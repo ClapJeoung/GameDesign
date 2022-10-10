@@ -90,9 +90,7 @@ public class Player_Move : MonoBehaviour
     else if (Input.GetKey(KeyCode.A)) Accel.x = -AccelDegree;                 //우측 버튼 : 가속도가 -
     else Accel.x = (Velocity.x != 0 ? Mathf.Sign(Velocity.x) : 0) * AccelResist;//아무것도 안 누름 : 가속도가 속도 반대로
 
-
     if (Input.GetKey(KeyCode.Space)&&Jumpable) { Velocity.y = JumpPower;JumpTime += Time.deltaTime; }//점프
-
 
 
     Velocity += Accel * Time.deltaTime; //속도에 가속추가
@@ -101,7 +99,7 @@ public class Player_Move : MonoBehaviour
 
     Velocity = new Vector2(Mathf.Clamp(Velocity.x,-MaxXSpeed,MaxXSpeed), Mathf.Clamp(Velocity.y,-MaxYSpeed,MaxYSpeed)); //속도 제한치
                                                         //    Velocity = new Vector2(Mathf.Abs(Velocity.x) < 0.1f ? 0 : Velocity.x, Mathf.Abs(Velocity.y) < 0.1f ? 0 : Velocity.y); //미세 떨림 없게
-    Velocity = new Vector2(Mathf.Abs(Velocity.x) < 0.05f ? 0 : Velocity.x,Velocity.y); //미세 떨림 없게
+    Velocity = new Vector2(Mathf.Abs(Velocity.x) < 0.3f ? 0 : Velocity.x,Velocity.y); //미세 떨림 없게
    if(asdf!=null) asdf.text = Velocity.ToString();  //디버그용 텍스트
     RaycastVertical();
     RaycastHorizontal();
@@ -124,7 +122,7 @@ public class Player_Move : MonoBehaviour
       _hit = Physics2D.Raycast(_newpos, _dir, _distance, _layermask) ;
       if (_hit.transform != null)
       {
-        var iswooden=new Wooden();
+        Wooden iswooden;
         if (_hit.transform.TryGetComponent<Wooden>(out iswooden) && !iswooden.IsActive) continue; //목재 비활성화면 무시
 
         if (Velocity.y < 0) { Jumpable = true; JumpTime = 0.0f; }
@@ -170,7 +168,7 @@ public class Player_Move : MonoBehaviour
       _hit = Physics2D.Raycast(_newpos, _dir, _distance, _layermask);
       if (_hit.transform != null)
       {
-        var iswooden = new Wooden();
+        Wooden iswooden;
         if (_hit.transform.TryGetComponent<Wooden>(out iswooden) && !iswooden.IsActive) continue; //목재 비활성화면 무시
 
         Velocity.x =_hit.distance - 0.1f*_dir.x ;
