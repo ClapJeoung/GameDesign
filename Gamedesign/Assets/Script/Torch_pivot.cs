@@ -4,28 +4,32 @@ using UnityEngine;
 
 public class Torch_pivot : MonoBehaviour
 {
-  [SerializeField] private float Radgravity = 60.0f;
-  private float CurrentRadius = 0.0f;
-  private float RadiusVelocity = 0.0f;
-  [SerializeField] private float InputPower = 70.0f;
-  [SerializeField] private float Length;
-  private Transform MyTrans;
-  [SerializeField] private float MaxSpeed = 60.0f;
-  [SerializeField] private float Resist = 30.0f;
-  private float Accel = 0.0f;
-  private bool IsPressing_R = false;
-  private bool IsPressing_L = false;
-  [SerializeField] private float ParticleLength;
-  [SerializeField] private float FireLength;
-  [SerializeField] private Transform ColliderTransform;
-  [SerializeField] private Transform FireTransform;
-  private ParticleSystem Particle_0 = null;
-   private ParticleSystem.ShapeModule Particle_0_shape;
-  private ParticleSystem Particle_1 = null;
+  [SerializeField] private float Radgravity = 60.0f;    //기울어지는 각도 속도
+  private float CurrentRadius = 0.0f;                   //현재 각도
+  private float RadiusVelocity = 0.0f;                  //현재 각도의 속도
+  [SerializeField] private float InputPower = 70.0f;    //입력 힘
+  [SerializeField] private float Length;                //플레이어로부터의 거리
+  private Transform MyTrans;                            //내 트랜스폼
+  [SerializeField] private float MaxSpeed = 60.0f;      //최고속도
+  [SerializeField] private float Resist = 30.0f;        //저항
+  private float Accel = 0.0f;                           //현재 가속
+  private bool IsPressing_R = false;                    //우측 버튼을 누르는 중인가요
+  private bool IsPressing_L = false;                    //좌측 버튼을 누르는 중인가요
+  [SerializeField] private float ParticleLength;        //플레이어로부터 파티클이 나오는 거리
+  [SerializeField] private float FireLength;            //플레이어로부터 불 이미지의 거리
+  [SerializeField] private Transform ColliderTransform; //불 콜라이더의 트랜스폼
+  [SerializeField] private Transform FireTransform;     //불 이미지의 트랜스폼
+  [HideInInspector] public bool IsDead = false;                          //죽었으면 아무것도 하지 않는다
+  private Vector2 DeadPos = Vector2.zero;               //플레이어가 죽은 그 위치
+  [SerializeField] private Transform PlayerTransform = null;//플레이어 트랜스폼(내 위치 기준)
+  [Space(5)]
+  [SerializeField] private ParticleSystem Particle_0 = null;             //파티클들
+  private ParticleSystem.ShapeModule Particle_0_shape;
+  [SerializeField] private ParticleSystem Particle_1 = null;
   private ParticleSystem.ShapeModule Particle_1_shape;
-   private ParticleSystem Particle_2 = null;
+  [SerializeField] private ParticleSystem Particle_2 = null;
   private ParticleSystem.ShapeModule Particle_2_shape;
-  private bool IsDead = false;
+
   private void Start()
   {
     Setup();
@@ -33,16 +37,13 @@ public class Torch_pivot : MonoBehaviour
   public void Setup()
   {
     MyTrans = transform;
-    ParticleSystem[] particles = GameManager.Instance.GetPlayerParticles();
-    Particle_0= particles[0];
-    Particle_1= particles[1];
-    Particle_2= particles[2];
     Particle_0_shape = Particle_0.shape;
     Particle_1_shape = Particle_1.shape;
     Particle_2_shape = Particle_2.shape;
-    if(!Particle_0.isPlaying)particles[0].Play();
+    DeadPos = MyTrans.position;
+    IsDead = true;
   }
-  public void Dead() => IsDead = true;
+  public void Dead() { IsDead = true; DeadPos = PlayerTransform.position; }
   private void Update()
   {
     if (IsDead) return;
@@ -64,10 +65,10 @@ public class Torch_pivot : MonoBehaviour
     CurrentRadius = CurrentRadius < -180.0f ? CurrentRadius + 360.0f : CurrentRadius;
 
     Vector3 _firepos = new Vector3(Mathf.Cos((CurrentRadius + 90.0f) * Mathf.Deg2Rad), Mathf.Sin((CurrentRadius + 90.0f) * Mathf.Deg2Rad));
-    
-    MyTrans.localPosition = new Vector3(Length * _firepos.x, Length * _firepos.y, -1.0f);
-    FireTransform.localPosition = new Vector3(FireLength * _firepos.x, FireLength * _firepos.y, -1.0f);
-    ColliderTransform.localPosition = new Vector3(FireLength * _firepos.x, FireLength * _firepos.y, -1.0f);
+
+    MyTrans.localPosition = PlayerTransform.position+ new Vector3(Length * _firepos.x, Length * _firepos.y, -1.0f);
+    FireTransform.localPosition = PlayerTransform.position + new Vector3(FireLength * _firepos.x, FireLength * _firepos.y, -1.0f);
+    ColliderTransform.localPosition = PlayerTransform.position + new Vector3(FireLength * _firepos.x, FireLength * _firepos.y, -1.0f);
     MyTrans.eulerAngles = new Vector3(0, 0, CurrentRadius);
 
     Particle_0_shape.position = FireTransform.position;
@@ -80,5 +81,38 @@ public class Torch_pivot : MonoBehaviour
     if(rad == 2) { RadiusVelocity -= InputPower * Time.deltaTime; return; }
     if (rad > -2 && rad < 2) { RadiusVelocity+=InputPower*Time.deltaTime*-dir; return; }
     RadiusVelocity += InputPower * Time.deltaTime * dir;
+  }
+  public void MoveToRespawn(Vector2 targetpos,float movetime)  //플레이어가 소멸된 후 리스폰 지역까지 이동하기
+  {
+    StartCoroutine(movetorespawn(targetpos, movetime));
+  }
+  private IEnumerator movetorespawn(Vector2 targetpos,float movetime)
+  {
+    float _time = 0.0f;
+    Vector3 _firepos = Vector3.zero;
+    float _currentradius = CurrentRadius;
+    Vector3 _currentpos = Vector3.zero;
+    while (_time < movetime)
+    {
+      CurrentRadius = Mathf.Lerp(_currentradius, 0.0f, _time / movetime);
+
+      _firepos = new Vector3(Mathf.Cos((CurrentRadius + 90.0f) * Mathf.Deg2Rad), Mathf.Sin((CurrentRadius + 90.0f) * Mathf.Deg2Rad));
+
+      _currentpos = Vector2.Lerp(DeadPos, targetpos, Mathf.Sqrt(_time / movetime));
+
+      MyTrans.localPosition = _currentpos + new Vector3(Length * _firepos.x, Length * _firepos.y, -1.0f);
+      FireTransform.localPosition = _currentpos + new Vector3(FireLength * _firepos.x, FireLength * _firepos.y, -1.0f);
+      ColliderTransform.localPosition = _currentpos + new Vector3(FireLength * _firepos.x, FireLength * _firepos.y, -1.0f);
+      MyTrans.eulerAngles = new Vector3(0, 0, CurrentRadius);
+
+      Particle_0_shape.position = FireTransform.position;
+      Particle_1_shape.position = FireTransform.position;
+      Particle_2_shape.position = FireTransform.position;
+
+      _time += Time.deltaTime;
+      yield return null;
+    }
+    Particle_1.Play();
+    IsDead = false;
   }
 }

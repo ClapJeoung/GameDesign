@@ -8,37 +8,79 @@ public class GameManager : MonoBehaviour
   public static GameManager Instance { get { return instance; } }
   [SerializeField] private Lamp_save NewestLamp = null;
   [SerializeField] private Portal MyPortal = null;
-  [SerializeField] private GameObject PlayerPrefab = null;
+  [SerializeField] private Transform PlayerTransform = null;
+  private Player_Move MyPlayerMove = null;
+  [SerializeField] private Torch MyTorch = null;
+  [SerializeField] private Torch_pivot MyTorchPivot = null;
   [Space(5)]
   [SerializeField] private GameObject WaterDown = null;
   [SerializeField] private GameObject WaterUp = null;
-  [Space(5)]
-  [SerializeField] private ParticleSystem[] PlayerParticles = null;
-  [SerializeField] private Transform[] ParticleTransforms = null;
   private Transform MyPlayer = null;
   [SerializeField] private FIreMask MyMask = null;
   [HideInInspector] public Dimension WorldDimension = Dimension.A;
   private void Awake()
   {
     if (instance == null) instance = this;
+    MyPlayerMove=PlayerTransform.GetComponent<Player_Move>();
   }
   [SerializeField] private MainCamera MyCamera = null;
-
+  private void Update()
+  {
+    if (Input.GetKeyDown(KeyCode.Tab)) Spawn();
+  }
   public void SetNewPlayer(Transform player)
   {
     MyPlayer = player;
     MyCamera.SetPlayer(player);
   }
   public void SetNewLamp(Lamp_save newlamp) => NewestLamp = newlamp;
-  public void Dead()  //플레이어 사망 애니메이션 전부 끝나고 호출
+  public void Dead()  //플레이어 사망 즉시 호출
+  {
+    MyTorchPivot.Dead();
+    MyTorch.Dead();
+  }
+  public void Spawn()   //게임 최초 시작
+  {
+    StartCoroutine(spawn());
+  }
+  private IEnumerator spawn()
+  {
+    float _cameramovetime = MyCamera.MoveToPosition(NewestLamp.transform.position, MyPortal.OpenningTime + MyPortal.RespawnTime);//카메라가 포탈까지 이동하는 시간
+
+    MyTorchPivot.MoveToRespawn(NewestLamp.transform.position + Vector3.up * 1.0f, _cameramovetime + MyPortal.OpenningTime + MyPortal.RespawnTime); //토치도 카메라 따라 이동
+    yield return new WaitForSeconds(_cameramovetime);   //카메라 이동하는 동안 대기
+
+    MyPortal.Open(NewestLamp.transform.position + Vector3.up * 1.0f);
+
+    yield return new WaitForSeconds(MyPortal.OpenningTime);  //포탈이 다 열릴때까지 대기
+
+    MyPlayerMove.Respawn(NewestLamp.transform.position + Vector3.up * 1.0f, MyPortal.RespawnTime);  //포탈이 열린 후 리스폰 시작
+
+    yield return new WaitForSeconds(MyPortal.RespawnTime);    //플레이어가 재생성되는 동안 대기
+
+    MyTorch.Ignite();
+    MyPortal.Close();
+  }
+  public void Respawn() //플레이어 사망 애니메이션 끝나고 호출
   {
     StartCoroutine(respawn());
   }
   private IEnumerator respawn()
   {
-    MyCamera.MoveToPosition(NewestLamp.transform.position);
-    yield return new WaitForSeconds(MyPortal.Open(NewestLamp.transform.position+Vector3.up*1.0f)+1.0f);
-    Instantiate(PlayerPrefab, NewestLamp.transform.position + Vector3.up * 1.0f, Quaternion.identity);
+    float _cameramovetime = MyCamera.MoveToPosition(NewestLamp.transform.position,MyPortal.OpenningTime+MyPortal.RespawnTime);//카메라가 포탈까지 이동하는 시간
+
+    MyTorchPivot.MoveToRespawn(NewestLamp.transform.position + Vector3.up * 1.0f, _cameramovetime+MyPortal.OpenningTime+MyPortal.RespawnTime); //토치도 카메라 따라 이동
+    yield return new WaitForSeconds(_cameramovetime);   //카메라 이동하는 동안 대기
+
+    MyPortal.Open(NewestLamp.transform.position + Vector3.up * 1.0f);
+
+    yield return new WaitForSeconds(MyPortal.OpenningTime);  //포탈이 다 열릴때까지 대기
+
+    MyPlayerMove.Respawn(NewestLamp.transform.position + Vector3.up * 1.0f, MyPortal.RespawnTime);  //포탈이 열린 후 리스폰 시작
+
+    yield return new WaitForSeconds(MyPortal.RespawnTime);    //플레이어가 재생성되는 동안 대기
+
+    MyTorch.Ignite();
     MyPortal.Close();
   }
   public void GetWaterParticle(out Transform waterdowntrans,out ParticleSystem waterdownpar,out Transform wateruptrans,out ParticleSystem wateruppar)
@@ -48,8 +90,6 @@ public class GameManager : MonoBehaviour
     wateruptrans = WaterUp.transform;
     wateruppar = WaterUp.GetComponent<ParticleSystem>();
   }
-  public ParticleSystem[] GetPlayerParticles() { return PlayerParticles; }
-  public Transform[] GetPlayerParticleTransforms() { return ParticleTransforms; }
 
   public void OpenMask(Vector2 newpos) { MyMask.Open(newpos); WorldDimension = Dimension.B; }
   public void CloseMask(Vector2 newpos) { MyMask.Close(newpos); WorldDimension = Dimension.A; }

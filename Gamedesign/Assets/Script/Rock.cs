@@ -54,7 +54,7 @@ public class Rock : MonoBehaviour
       {
         _name += _hit[j].transform.name + " ";
       }
-      Debug.Log(_name);
+ //     Debug.Log(_name);
       for(int j=_hit.Length-1; j>=0; j--)
       {
         _targethit = _hit[j]; //_hit의 맨 뒤부터(제일 먼저 걸린 것부터) _targethit에 대입

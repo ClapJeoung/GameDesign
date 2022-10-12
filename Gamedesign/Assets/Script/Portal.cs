@@ -6,16 +6,16 @@ public class Portal : MonoBehaviour
 {
   [SerializeField] private SpriteRenderer MySpr = null; //스프라이트랜더러
   private Color MyAlpha= Color.white;                   //투명도 조절용 알파값
-  [SerializeField] private float OpenningTime = 1.5f;   //포탈 열리는 시간
+  public float OpenningTime = 1.5f;   //포탈 열리는 시간
   [SerializeField] private float ClosingTime = 0.5f;    //포탈 닫히는 시간
+  public float RespawnTime = 1.5f;                      //플레이어가 재생성되는 시간
   [SerializeField] private Transform MyTransform = null;//트랜스폼
   [SerializeField] private float RotateSpeed = 180.0f;
 
-  public float Open(Vector2 targetpos)
+  public void Open(Vector2 targetpos)
   {
     MyTransform.position = (Vector3)targetpos+Vector3.back;
     StartCoroutine(open());
-    return OpenningTime;
   }
   public void Close() => StartCoroutine(close());
   private IEnumerator open()

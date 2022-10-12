@@ -35,16 +35,17 @@ public class Player_Move : MonoBehaviour
   private bool IsWater = false;      //물 속에 있는지
   private bool IsDead = false;  //사망 시 모든 활동 정지시키기
   [Space(5)]
-  [SerializeField] private Torch_pivot MyTorchPivot = null; //사망 신호를 전달할 토치 피벗
-  [Space(5)]
   [SerializeField] private int ShakeCount = 55;
   [SerializeField] private float ShakeTime = 4.0f;
   [SerializeField] private float ShakeDegree = 0.05f;
+  [SerializeField] private SpriteRenderer MySpr = null;
   [Space(5)]
-  private Transform WaterDownTrans = null;
-  private ParticleSystem WaterDownParticle = null;
-  private Transform WaterUpTrans = null;
-  private ParticleSystem WaterUpParticle = null;
+  [SerializeField] private ParticleSystem WaterDownParticle = null;
+  private ParticleSystem.ShapeModule WaterDownShape;
+  [SerializeField] private ParticleSystem WaterUpParticle = null;
+  private ParticleSystem.ShapeModule WaterUpShape;
+  [SerializeField] private ParticleSystem DeadParticle = null;
+  private ParticleSystem.ShapeModule DeadShape;
 
   public void Setup()
   {
@@ -66,8 +67,12 @@ public class Player_Move : MonoBehaviour
       Vertex_right[i] = new Vector2(_width / 2, -_height / 2 + _size_height * i);
       Vertex_left[i] = new Vector2(-_width / 2, -_height / 2 + _size_height * i);
     }
+    MyTransform.localScale = Vector3.zero;
+    WaterDownShape = WaterDownParticle.shape;
+    WaterUpShape = WaterUpParticle.shape;
+    DeadShape = DeadParticle.shape;
 
-    GameManager.Instance.GetWaterParticle(out WaterDownTrans, out WaterDownParticle, out WaterUpTrans, out WaterUpParticle);
+    IsDead = true;
   }
   public void Start()
   {
@@ -99,7 +104,7 @@ public class Player_Move : MonoBehaviour
 
     Velocity = new Vector2(Mathf.Clamp(Velocity.x,-MaxXSpeed,MaxXSpeed), Mathf.Clamp(Velocity.y,-MaxYSpeed,MaxYSpeed)); //속도 제한치
                                                         //    Velocity = new Vector2(Mathf.Abs(Velocity.x) < 0.1f ? 0 : Velocity.x, Mathf.Abs(Velocity.y) < 0.1f ? 0 : Velocity.y); //미세 떨림 없게
-    Velocity = new Vector2(Mathf.Abs(Velocity.x) < 0.3f ? 0 : Velocity.x,Velocity.y); //미세 떨림 없게
+    Velocity = new Vector2(Mathf.Abs(Velocity.x) < 0.05f ? 0 : Velocity.x,Velocity.y); //미세 떨림 없게
    if(asdf!=null) asdf.text = Velocity.ToString();  //디버그용 텍스트
     RaycastVertical();
     RaycastHorizontal();
@@ -183,7 +188,7 @@ public class Player_Move : MonoBehaviour
     if (collision.gameObject.layer ==  LayerMask.NameToLayer("Water"))
     {
       Velocity.y = 0.0f; IsWater = true; WaterAccel = 180.0f; Jumpable = true;
-      WaterDownTrans.position = MyTransform.position + Vector3.down * 0.5f;
+      WaterDownShape.position = MyTransform.position + Vector3.down * 0.5f;
       WaterDownParticle.Play();
     }
   }
@@ -192,7 +197,7 @@ public class Player_Move : MonoBehaviour
     if (collision.gameObject.layer ==LayerMask.NameToLayer("Water"))
     {
       IsWater = false;
-      WaterUpTrans.position = MyTransform.position + Vector3.down * 0.5f;
+      WaterUpShape.position = MyTransform.position + Vector3.down * 0.5f;
       WaterUpParticle.Play();
     }
   }
@@ -203,7 +208,7 @@ public class Player_Move : MonoBehaviour
   public void Dead() => StartCoroutine(dead());
   private IEnumerator dead()
   {
-    MyTorchPivot.Dead();
+    GameManager.Instance.Dead();
     IsDead = true;
     yield return new WaitForSeconds(1.0f);
     Vector2 _originpos = MyTransform.position;
@@ -213,9 +218,35 @@ public class Player_Move : MonoBehaviour
       yield return new WaitForSeconds(ShakeTime / ShakeCount);
     }
     MyTransform.position = _originpos;
+
+    MyTransform.localScale = Vector3.zero;
+    DeadShape.position = MyTransform.position;
+    DeadParticle.Play();
+
     yield return new WaitForSeconds(1.0f);
-    GameManager.Instance.Dead();
-    Destroy(gameObject);
+
+    GameManager.Instance.Respawn();
     yield return null;
+  }
+  public void Respawn(Vector2 newpos, float spawningtime) //리스폰
+  {
+    MyTransform.position = newpos;          //위치로 이동하고
+    StartCoroutine(respawn(spawningtime));  //코루틴 시작
+  }
+  private IEnumerator respawn(float spawningtime)
+  {
+    float _time = 0.0f;
+    while (_time < spawningtime)  //spawningtime동안 1.0까지 점점 커짐
+    {
+      MyTransform.localScale = Vector3.one * Mathf.Lerp(0, 1.0f,Mathf.Pow(_time / spawningtime,2.0f));
+      _time += Time.deltaTime;
+      yield return null;
+    }
+    MyTransform.localScale = Vector3.one;
+
+    IsDead = false;           //크기 원상복구됐으면 프로퍼티 초기화
+    IsWater = false;
+    Accel = Vector2.zero;
+    Velocity = Vector2.zero;
   }
 }

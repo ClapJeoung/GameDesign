@@ -29,6 +29,7 @@ public class MainButtons : MonoBehaviour
     SelectParticle.Stop();
     PressedParticle.Play();
     ButtonPressed = true;
+    SceneLoader.Instance.StartGame();
   }
   public void UnPressed()
   {
