@@ -29,7 +29,7 @@ public class Torch_pivot : MonoBehaviour
   private ParticleSystem.ShapeModule Particle_1_shape;
   [SerializeField] private ParticleSystem Particle_2 = null;
   private ParticleSystem.ShapeModule Particle_2_shape;
-
+  [SerializeField] private int RespawnSpinCount = 4;    //리스폰시 회전되는 횟수
   private void Start()
   {
     Setup();
@@ -114,5 +114,47 @@ public class Torch_pivot : MonoBehaviour
     }
     Particle_1.Play();
     IsDead = false;
+  }
+  private IEnumerator movetorespawn_1(Vector2 targetpos,float movetime)
+  {
+    float _time = 0.0f;
+    Vector3 _firepos = Vector3.zero;
+    float _currentradius = CurrentRadius;
+    Vector3 _currentpos = Vector3.zero;
+    Vector3 _middlepos = Vector3.Lerp(DeadPos, targetpos, 0.5f);
+    float _length = Vector3.Distance(DeadPos, targetpos)/2.0f;
+    Vector3 _tan = DeadPos - targetpos;
+    float _startangle = Mathf.Atan2(_tan.y, _tan.x)*Mathf.Rad2Deg;
+    float _endangle = _startangle + (DeadPos.x < targetpos.x ? 180.0f : -180.0f);
+    if (_endangle < -180.0f) _endangle += 360.0f;
+    else if (_endangle > 180.0f) _endangle -= 360.0f;
+    float _currentangle = _startangle;
+    Debug.Log($"Deadpos : {DeadPos}   Targetpos : {targetpos}   Middlepos : {_middlepos}\n" +
+      $"startangle : {_startangle}   endangle : {_endangle}");
+    while (_time < movetime)
+    {
+      CurrentRadius = Mathf.Lerp(_currentradius, RespawnSpinCount*360.0f, _time / movetime);
+
+      _firepos = new Vector3(Mathf.Cos((CurrentRadius + 90.0f) * Mathf.Deg2Rad), Mathf.Sin((CurrentRadius + 90.0f) * Mathf.Deg2Rad));
+
+      //   _currentpos = Vector2.Lerp(DeadPos, targetpos, Mathf.Sqrt(_time / movetime));
+      _currentangle = Mathf.Lerp(_startangle, _endangle, Mathf.Sqrt(_time / movetime));
+      _currentpos = _middlepos + new Vector3(Mathf.Cos(_currentangle * Mathf.Deg2Rad), Mathf.Sin(_currentangle * Mathf.Deg2Rad))* _length;
+
+      MyTrans.localPosition = _currentpos + new Vector3(Length * _firepos.x, Length * _firepos.y, -1.0f);
+      FireTransform.localPosition = _currentpos + new Vector3(FireLength * _firepos.x, FireLength * _firepos.y, -1.0f);
+      ColliderTransform.localPosition = _currentpos + new Vector3(FireLength * _firepos.x, FireLength * _firepos.y, -1.0f);
+      MyTrans.eulerAngles = new Vector3(0, 0, CurrentRadius);
+
+      Particle_0_shape.position = FireTransform.position;
+      Particle_1_shape.position = FireTransform.position;
+      Particle_2_shape.position = FireTransform.position;
+
+      _time += Time.deltaTime;
+      yield return null;
+    }
+    Particle_1.Play();
+    IsDead = false;
+    yield return null;
   }
 }

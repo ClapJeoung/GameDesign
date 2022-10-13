@@ -50,11 +50,11 @@ public class Torch : MonoBehaviour
 
     MyLight.intensity = 0.0f;             //죽어있는 상태로 시작
     FireTrans.localScale = Vector3.zero;
-
+    firepower = 0.0f;
   }
   private void OnTriggerEnter2D(Collider2D collision)
   {
-  //  if(FirePower <= 0.0f) return;
+    if(FirePower <= 0.0f) return;
 
     if (collision.CompareTag("Interactable")) {CurrentInteract= collision.GetComponent<Interactable>();CurrentInteract.FireUp(); }
     else if (collision.CompareTag("Recharge")) IsRecharging = true;
