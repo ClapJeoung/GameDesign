@@ -50,11 +50,11 @@ public class MainCamera : MonoBehaviour
     Vector3 _originpos = MyTransform.position;
     Vector3 _newpos = newpos + Vector3.back * 10.0f;
     float _particlerate = MinParticle;
-    RP_start_emission.rateOverTime = _particlerate;
-    RP_start.Play();
+   // RP_start_emission.rateOverTime = _particlerate;
+   // RP_start.Play();
     while (_time < RespawnMovetime)
     {
-      NewPos = Vector3.Lerp(_originpos, _newpos,Mathf.Pow(_time/ RespawnMovetime,3.0f));
+      NewPos = Vector3.Lerp(_originpos, _newpos,Mathf.Pow(_time/ RespawnMovetime,2.5f));
       NewPos = new Vector3(NewPos.x, Mathf.Clamp(NewPos.y, MinY, MaxY), -10.0f);
       MyTransform.position = NewPos;
       _particlerate = Mathf.Lerp(MinParticle, MaxParticle, Mathf.Pow((_time / RespawnMovetime), 2.0f));
@@ -63,8 +63,8 @@ public class MainCamera : MonoBehaviour
       yield return null;
     }
     yield return new WaitForSeconds(waittime);
-    RP_start.Stop();
-    RP_end.Play();
+  //  RP_start.Stop();
+  //  RP_end.Play();
     IsDead = false;
   }
 }

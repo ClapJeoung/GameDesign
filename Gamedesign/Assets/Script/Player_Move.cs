@@ -61,6 +61,7 @@ public class Player_Move : MonoBehaviour
   [SerializeField] private ParticleSystem DeadParticle = null;
   private ParticleSystem.ShapeModule DeadShape;
   private bool flipx = true;
+  private bool IsPlaying = true;
   public void Setup()
   {
     MyTransform = transform;
@@ -87,6 +88,7 @@ public class Player_Move : MonoBehaviour
     DeadShape = DeadParticle.shape;
 
     IsDead = true;
+    IsPlaying = false;
   }
   public void Start()
   {
@@ -99,21 +101,24 @@ public class Player_Move : MonoBehaviour
     if (IsWater)
     {
       WaterAccel += Time.deltaTime * WaterSpeed;
-      Accel = new Vector2(0, Mathf.Cos(Mathf.Deg2Rad * WaterAccel) * FloatingDegree);
+      Accel.y=( Mathf.Cos(Mathf.Deg2Rad * WaterAccel) * FloatingDegree);
     }
     else
     {
-      Accel = new Vector2(0, GrvtDegree);
+      Accel.y = GrvtDegree;
     }
 
-    if (Input.GetKey(KeyCode.D)) { Accel.x = AccelDegree; flipx = false; }                      //좌측 버튼 : 가속도가 +
-    else if (Input.GetKey(KeyCode.A)){ Accel.x = -AccelDegree; flipx = true; }                 //우측 버튼 : 가속도가 -
-    else Accel.x = (Velocity.x != 0 ? Mathf.Sign(Velocity.x) : 0) * AccelResist;//아무것도 안 누름 : 가속도가 속도 반대로
+    if (IsPlaying)  //조작중일때만
+    {
+      Accel.x = 0;
+      if (Input.GetKey(KeyCode.D)) { Accel.x = AccelDegree; flipx = false; }                      //좌측 버튼 : 가속도가 +
+      else if (Input.GetKey(KeyCode.A)) { Accel.x = -AccelDegree; flipx = true; }                 //우측 버튼 : 가속도가 -
+      else Accel.x = (Velocity.x != 0 ? Mathf.Sign(Velocity.x) : 0) * AccelResist;//아무것도 안 누름 : 가속도가 속도 반대로
+    }
 
-    if (Accel.x != 0) MySpr.flipX = flipx;
+    if (Input.GetKey(KeyCode.Space) && Jumpable) Jump();//점프
 
-    if (Input.GetKey(KeyCode.Space)&&Jumpable) 
-    { Velocity =new Vector2(Velocity.x,JumpPower);JumpTime += Time.deltaTime; MyAnimator.SetTrigger("Jump"); }//점프
+    if(MySpr.flipX!=flipx)MySpr.flipX = flipx;
 
 
     Velocity += Accel * Time.deltaTime; //속도에 가속추가
@@ -127,7 +132,13 @@ public class Player_Move : MonoBehaviour
     Velocity = new Vector2(Mathf.Abs(velocity.x) < 0.05f ? 0 : velocity.x, velocity.y); //미세 떨림 없게
 
     MyTransform.Translate((Velocity+ Vector2.right * ConveyorSpeed * Conveyor) * Time.deltaTime);
-    Debug.Log("Accel : " + Accel);
+   // Debug.Log("Accel : " + Accel);
+  }
+  private void Jump()
+  {
+    Velocity = new Vector2(Velocity.x, JumpPower); 
+    JumpTime += Time.deltaTime; 
+    MyAnimator.SetTrigger("Jump");
   }
   private void RaycastVertical()  //위아래 검사
   {
@@ -230,6 +241,7 @@ public class Player_Move : MonoBehaviour
   {
     GameManager.Instance.Dead();
     IsDead = true;
+    IsPlaying = false;
     yield return new WaitForSeconds(1.0f);
     Vector3 _originpos = MyTransform.position;
     for(int i = 0; i < ShakeCount; i++)
@@ -248,12 +260,31 @@ public class Player_Move : MonoBehaviour
     GameManager.Instance.Respawn();
     yield return null;
   }
-  public void Respawn(Vector2 newpos, float spawningtime) //리스폰
+  public void Respawn(Vector2 newpos,float targetx,bool isleft) //리스폰
   {
     MyTransform.position = (Vector3)newpos + Vector3.back * 2;          //위치로 이동하고
-    StartCoroutine(respawn(spawningtime));  //코루틴 시작
+    MyTransform.localScale = Vector3.one;
+    Debug.Log($"isleft : {isleft}  newpos.x : {newpos.x}  targetpos.x : {targetx}");
+    StartCoroutine(respawn(targetx, isleft));  //코루틴 시작
   }
-  private IEnumerator respawn(float spawningtime)
+  private IEnumerator respawn(float targetx,bool isleft)
+  {
+    yield return new WaitForSeconds(0.8f);
+    IsDead = false;
+    Accel.x = AccelDegree*(isleft?1:-1);
+    flipx = !isleft;
+    if (isleft)
+    {
+      yield return new WaitUntil(() => { return MyTransform.position.x >= targetx; });
+    }
+    else
+    {
+      yield return new WaitUntil(() => { return MyTransform.position.x <= targetx; });
+    }
+    Debug.Log("새로운 시작인 레후~");
+    IsPlaying = true;
+  }
+  private IEnumerator respawn_old(float spawningtime) //구 리스폰 연출
   {
     float _time = 0.0f;
     while (_time < spawningtime)  //spawningtime동안 1.0까지 점점 커짐

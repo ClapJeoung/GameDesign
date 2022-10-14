@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.U2D;
 using UnityEngine.Rendering.Universal;
 
-public class Lamp_save :MonoBehaviour, Interactable   //램프의 스크립트
+public class Lamp_save :RespawnObj, Interactable   //램프의 스크립트
 {
   [SerializeField] private bool IsFired = false;      //켜져 있는 램프인지
   [SerializeField] private float RequireTime = 2.0f;  //점화에 걸리는 시간
@@ -63,7 +63,7 @@ public class Lamp_save :MonoBehaviour, Interactable   //램프의 스크립트
     //진행도가 음수까지 떨어지면 이쯤에서 시마이
 
     if (Progress > RequireTime) 
-    { Progress = RequireTime;FiredParticle.Play(); Ignitable = false;gameObject.tag = "Recharge"; GameManager.Instance.SetNewLamp(this); }  //진행도가 최대치로 증가하면 끝
+    { Progress = RequireTime;FiredParticle.Play(); Ignitable = false;gameObject.tag = "Recharge"; GameManager.Instance.SetNewRespawn(this); }  //진행도가 최대치로 증가하면 끝
 
       MyTransform.localScale = Vector3.one * Mathf.Pow((Progress / RequireTime),2);  //진행도에 비례해 크기 증가
     CurrentColor.a = Mathf.Sqrt(Progress / RequireTime);              //진행도의 루트 그래프 비율로 투명도 증가
