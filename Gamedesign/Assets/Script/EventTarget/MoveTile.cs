@@ -9,17 +9,20 @@ public class MoveTile : EventTarget
   [SerializeField] private float MoveTime = 1.5f;             //움직이는 시간
   private Transform MyTransform = null;
   private float Progress = 0.0f;
-
+  [SerializeField] private bool AlwaysActive=false;
+  [SerializeField] private bool KeepMoving = false;
+  [SerializeField] private float Waittime = 1.0f;
   private void Start()
   {
     MyTransform= transform;
     OriginPos = transform.position;
-    TargetPos += OriginPos;
+    if (AlwaysActive) StartCoroutine(keepmoving());
   }
   public override void Active()
   {
     StopAllCoroutines();
-    StartCoroutine(movefoward());
+    if (KeepMoving) StartCoroutine(keepmoving());
+    else StartCoroutine(movefoward());
   }
   public override void Deactive()
   {
@@ -28,24 +31,37 @@ public class MoveTile : EventTarget
   }
   private IEnumerator movefoward()
   {
-    Vector2 _currentpos = MyTransform.position;
     while (Progress < MoveTime)
     {
-      MyTransform.position = Vector2.Lerp(_currentpos, TargetPos, Mathf.Sqrt(Progress / MoveTime));
+      MyTransform.position = Vector2.Lerp(OriginPos, TargetPos, Mathf.Pow(Progress / MoveTime,2.0f));
       Progress += Time.deltaTime;
       yield return null;
     }
     MyTransform.position = TargetPos;
+    Progress = MoveTime;
+    yield return null;
   }
   private IEnumerator movebackward()
   {
-    Vector2 _currentpos = MyTransform.position;
     while (Progress > 0.0f)
     {
-      MyTransform.position = Vector2.Lerp(_currentpos, OriginPos, Mathf.Sqrt(Progress / MoveTime));
+      MyTransform.position = Vector2.Lerp(OriginPos, TargetPos, Mathf.Pow(Progress / MoveTime, 2.0f));
       Progress -= Time.deltaTime;
       yield return null;
     }
     MyTransform.position = OriginPos;
+    Progress = 0.0f;
+    yield return null;
+  }
+  private IEnumerator keepmoving()
+  {
+    while (true)
+    {
+      yield return StartCoroutine(movefoward());
+      yield return new WaitForSeconds(Waittime);
+      yield return StartCoroutine(movebackward());
+      yield return new WaitForSeconds(Waittime);
+      yield return null;
+    }
   }
 }

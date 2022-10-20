@@ -14,10 +14,10 @@ public class Player_Move : MonoBehaviour
 
       velocity = value;
 
-      MyAnimator.SetBool("IsWalking", Mathf.Abs(velocity.x) > 0.1f);
       //플레이어 이동속도가 0.1 이하면 걷기도 아니다
     }
   }
+  private Vector2 NextVelocity = Vector2.zero;
   [SerializeField] private float AccelDegree = -3.0f; //이동 입력시 가속도
   [SerializeField] private float AccelResist = -3.0f; //멈춤 가속도
   [SerializeField] private float MaxXSpeed = 5.0f;    //최대 X 속도(절댓값)
@@ -27,8 +27,6 @@ public class Player_Move : MonoBehaviour
   [SerializeField] private float JumpPower = 8.0f;    //점프 입력시 바뀌는 속도
   [SerializeField] private float MaxJumpTime = 0.6f;  //최대 점프 시간
   [SerializeField] private float MaxYSpeed = 10.0f;   //최대 Y 속도(절댓값)
-  private BoxCollider2D Col;                          //내 콜라이더
-  private Bounds MyBound;                             //내 바운드
   [Space(5)]
   [SerializeField] private int VertexCount = 5;       //충돌 검사할 점 개수
   private Vector2[] Vertex_top, Vertex_bottom,Vertex_right,Vertex_left;//충돌 검사할 점 위치
@@ -62,18 +60,20 @@ public class Player_Move : MonoBehaviour
   private ParticleSystem.ShapeModule DeadShape;
   private bool flipx = true;
   private bool IsPlaying = true;
+  private bool IsPressing = false;
   public void Setup()
   {
     MyTransform = transform;
-    Col = GetComponent<BoxCollider2D>();
-    MyBound = Col.bounds;
+    BoxCollider2D Col = GetComponent<BoxCollider2D>();
+
+    Bounds MyBound = Col.bounds;
     Vertex_top = new Vector2[VertexCount]; Vertex_bottom = new Vector2[VertexCount];
     Vertex_right = new Vector2[VertexCount]; Vertex_left = new Vector2[VertexCount]; //버텍스 개수 설정
-    MyBound.Expand(0.05f);
+    MyBound.Expand(-0.025f);
     float _width = MyBound.size.x;
     float _height = MyBound.size.y;
-    float _size_width = _width / VertexCount;
-    float _size_height = _height / VertexCount;                                 //바운드 사이즈, 단위 설정
+    float _size_width = _width / (VertexCount-1);
+    float _size_height = _height / (VertexCount-1);                                 //바운드 사이즈, 단위 설정
 
     for (int i = 0; i < VertexCount; i++)
     {
@@ -86,7 +86,7 @@ public class Player_Move : MonoBehaviour
     WaterDownShape = WaterDownParticle.shape;
     WaterUpShape = WaterUpParticle.shape;
     DeadShape = DeadParticle.shape;
-
+    MyBound.Expand(+0.025f);
     IsDead = true;
     IsPlaying = false;
   }
@@ -97,23 +97,25 @@ public class Player_Move : MonoBehaviour
   }
   private void UpdateMove()
   {
+    if (Input.GetKeyDown(KeyCode.Escape)) Time.timeScale = 0.3f;
     if (IsDead) return;
-    if (IsWater)
-    {
-      WaterAccel += Time.deltaTime * WaterSpeed;
-      Accel.y=( Mathf.Cos(Mathf.Deg2Rad * WaterAccel) * FloatingDegree);
-    }
-    else
-    {
-      Accel.y = GrvtDegree;
-    }
+
+    Accel.y = GrvtDegree;
 
     if (IsPlaying)  //조작중일때만
     {
+      if (IsWater)
+      {
+        WaterAccel += Time.deltaTime * WaterSpeed;
+        Accel.y = (Mathf.Cos(Mathf.Deg2Rad * WaterAccel) * FloatingDegree);
+      }
+
       Accel.x = 0;
-      if (Input.GetKey(KeyCode.D)) { Accel.x = AccelDegree; flipx = false; }                      //좌측 버튼 : 가속도가 +
-      else if (Input.GetKey(KeyCode.A)) { Accel.x = -AccelDegree; flipx = true; }                 //우측 버튼 : 가속도가 -
-      else Accel.x = (Velocity.x != 0 ? Mathf.Sign(Velocity.x) : 0) * AccelResist;//아무것도 안 누름 : 가속도가 속도 반대로
+      if (Input.GetKey(KeyCode.D)) { Accel.x = AccelDegree; flipx = false; IsPressing = true; }                      //좌측 버튼 : 가속도가 +
+      else if (Input.GetKey(KeyCode.A)) { Accel.x = -AccelDegree; flipx = true; IsPressing = true; }                 //우측 버튼 : 가속도가 -
+      else {
+        IsPressing = false;
+        Accel.x = (NextVelocity.x != 0 ? Mathf.Sign(NextVelocity.x) : 0) * AccelResist; }//아무것도 안 누름 : 가속도가 속도 반대로
     }
 
     if (Input.GetKey(KeyCode.Space) && Jumpable) Jump();//점프
@@ -121,32 +123,44 @@ public class Player_Move : MonoBehaviour
     if(MySpr.flipX!=flipx)MySpr.flipX = flipx;
 
 
-    Velocity += Accel * Time.deltaTime; //속도에 가속추가
-
+    NextVelocity += Accel * Time.deltaTime; //속도에 가속추가
+    if (IsPressing == false)  //이동을 누르지 않았는데
+    {
+      if(Mathf.Sign(Velocity.x)!=Mathf.Sign(NextVelocity.x)||(Velocity.x==0&NextVelocity.x!=0))NextVelocity.x = 0;
+      //가속도 때문에 속도의 부호가 바뀌어버리거나 정지해 있던게 이동한다면 0으로 교정
+    }
 
     if (asdf!=null) asdf.text = Velocity.ToString();  //디버그용 텍스트
     RaycastVertical();
     RaycastHorizontal();
 
-    Velocity = new Vector2(Mathf.Clamp(Velocity.x, -MaxXSpeed, MaxXSpeed), Mathf.Clamp(Velocity.y, -MaxYSpeed, MaxYSpeed)); //속도 제한치
-    Velocity = new Vector2(Mathf.Abs(velocity.x) < 0.05f ? 0 : velocity.x, velocity.y); //미세 떨림 없게
+
+    NextVelocity = new Vector2(Mathf.Clamp(NextVelocity.x, -MaxXSpeed, MaxXSpeed), Mathf.Clamp(NextVelocity.y, -MaxYSpeed, MaxYSpeed)); //속도 제한치
+
+   // Velocity = new Vector2(Mathf.Abs(NextVelocity.x) < 0.05f ? 0 : NextVelocity.x, NextVelocity.y); //미세 떨림 없게
+  //  Debug.Log($"{newvel} -> {Velocity}");
+
+    Velocity = NextVelocity;
+
+    MyAnimator.SetBool("IsWalking", Velocity.x !=0.0f);
 
     MyTransform.Translate((Velocity+ Vector2.right * ConveyorSpeed * Conveyor) * Time.deltaTime);
    // Debug.Log("Accel : " + Accel);
   }
   private void Jump()
   {
-    Velocity = new Vector2(Velocity.x, JumpPower); 
+    NextVelocity = new Vector2(NextVelocity.x, JumpPower); 
     JumpTime += Time.deltaTime; 
     MyAnimator.SetTrigger("Jump");
   }
   private void RaycastVertical()  //위아래 검사
   {
-    Vector2[] _pos = Velocity.y > 0 ? Vertex_top : Vertex_bottom; //선이 시작되는 위치(바운드 기준)
-    Vector2 _dir = Velocity.y > 0?Vector2.up : Vector2.down;      //선이 발사되는 위치
+    Vector2[] _pos = NextVelocity.y <= 0 ? Vertex_bottom : Vertex_top; //선이 시작되는 위치(바운드 기준)
+    Vector2 _dir = NextVelocity.y <= 0?Vector2.down : Vector2.up;      //선이 발사되는 위치
     Vector3 _newpos = Vector3.zero;                               //선이 시작되는 위치(플레이어 기준)
     int _layermask;          //레이어마스크(int)
-    float _distance = Mathf.Abs( Velocity.y) * Time.deltaTime;                //선이 발사되는 거리
+    float _distance = 0.025f+ Mathf.Abs(NextVelocity.y) * Time.deltaTime;                //선이 발사되는 거리
+    if (_distance == 0.0f) _distance = 0.025f;
     RaycastHit2D _hit;                                            //선이 발사되고 닿은 곳의 정보
     Conveyor = 0; //컨베이어 초기화
 
@@ -155,15 +169,17 @@ public class Player_Move : MonoBehaviour
       _layermask = 1 << LayerMask.NameToLayer("Wall");  //벽 역할을 하는 레이어 검사
       _newpos = MyTransform.position + (Vector3)_pos[i];
       _hit = Physics2D.Raycast(_newpos, _dir, _distance, _layermask) ;
+      Debug.DrawRay(_newpos, _dir * _distance, Color.red);
       if (_hit.transform != null)
       {
         Wooden iswooden;
         if (_hit.transform.TryGetComponent<Wooden>(out iswooden) && !iswooden.IsActive) continue; //목재 비활성화면 무시
 
-        if (Velocity.y < 0) { Jumpable = true; JumpTime = 0.0f; }
+        if (NextVelocity.y < 0) { Jumpable = true; JumpTime = 0.0f; }
 
-        Velocity =new Vector2(Velocity.x,_hit.distance*_dir.y);
-  //      Debug.Log(_hit.transform.tag);
+        NextVelocity = new Vector2(NextVelocity.x,(_hit.distance- 0.025f )* _dir.y);
+        //      Debug.Log(_hit.transform.tag);
+        Debug.DrawRay(_newpos, _dir * _hit.distance, Color.green);
 
         if (_hit.transform.CompareTag("Breakable"))
           _hit.transform.GetComponent<Breakable>().Pressed(); //밟아서 부숴지는 이벤트 실행
@@ -172,53 +188,55 @@ public class Player_Move : MonoBehaviour
         break;
       }
      if(!IsWater) Jumpable = false;
-      if (Velocity.y > 0) continue; //점프 중이면 여기서 종료, 하강 중이면 Upper 블록도 발판으로 인식
+      if (NextVelocity.y > 0) continue; //점프 중이면 여기서 종료, 하강 중이면 Upper 블록도 발판으로 인식
       _layermask = 1 << LayerMask.NameToLayer("Upper");  //윗블록 검사
       _hit = Physics2D.Raycast(_newpos, _dir, _distance, _layermask);
       if (_hit.transform != null)
       {
-        if (Velocity.y < 0) { Jumpable = true; JumpTime = 0.0f; }
-        Velocity = new Vector2(Velocity.x, _hit.distance * _dir.y);
+        if (NextVelocity.y < 0) { Jumpable = true; JumpTime = 0.0f; }
+        NextVelocity = new Vector2(NextVelocity.x, _hit.distance * _dir.y);
         break;
       }
     }
   }
   private void RaycastHorizontal()//좌우 검사
   {
- //   if (Velocity.x == 0) return;
+    //   if (NextVelocity.x == 0) return;
 
-    Vector2[] _pos = Velocity.x > 0 ? Vertex_right : Vertex_left; //선이 시작되는 위치(바운드 기준)
-    Vector2 _dir = Velocity.x > 0 ? Vector2.right : Vector2.left;      //선이 발사되는 위치
+    Vector2[] _pos = NextVelocity.x >= 0 ? Vertex_right : Vertex_left; //선이 시작되는 위치(바운드 기준)
+    Vector2 _dir = NextVelocity.x >= 0 ? Vector2.right : Vector2.left;      //선이 발사되는 방향
     Vector3 _newpos = Vector3.zero;                               //선이 시작되는 위치(플레이어 기준)
     int _layermask = 1 << LayerMask.NameToLayer("Wall");          //레이어마스크(int)
-    float _distance = Mathf.Abs(Velocity.x) * Time.deltaTime;                //선이 발사되는 거리
+    float _distance = 0.025f+ Mathf.Abs(NextVelocity.x) * Time.deltaTime;                //선이 발사되는 거리
+    if (_distance == 0.0f) _distance = 0.025f;
     RaycastHit2D _hit;                                            //선이 발사되고 닿은 곳의 정보
 
 
     for (int i = 0; i < VertexCount; i++)
     {
       _newpos = MyTransform.position + (Vector3)_pos[i];
-  //    Debug.Log(i);
       _layermask = 1<< LayerMask.NameToLayer("Wall");  //벽 검사
       _hit = Physics2D.Raycast(_newpos, _dir, _distance, _layermask);
+      Debug.DrawRay(_newpos, _dir * _distance, Color.red);
       if (_hit.transform != null)
       {
-      //  Debug.Log(_hit.transform.name);
+   //  Debug.Log($"{_hit.transform.name}  {_hit.transform.position}");
         Wooden iswooden;
         if (_hit.transform.TryGetComponent<Wooden>(out iswooden) && !iswooden.IsActive) continue; //목재 비활성화면 무시
 
-        Velocity = new Vector2(_hit.distance - 0.1f*_dir.x,Velocity.y );
+        //   NextVelocity = new Vector2((_hit.distance>0.1f?_hit.distance - 0.1f:_hit.distance)*_dir.x,NextVelocity.y );
+        NextVelocity = new Vector2( (_hit.distance- 0.025f) * _dir.x, NextVelocity.y);
+        Debug.DrawRay(_newpos, _dir * _hit.distance, Color.green);
         break;
       }
-      Debug.DrawRay(_newpos, _dir, Color.red, _distance);
-      //   Debug.Log($"_distance : {_distance}  hit.distance : {_hit.distance}  velocity.x : {Velocity.x}");
+      //   Debug.Log($"_distance : {_distance}  hit.distance : {_hit.distance}  NextVelocity.x : {NextVelocity.x}");
     }
   }
   private void OnTriggerEnter2D(Collider2D collision)
   {
     if (collision.gameObject.layer ==  LayerMask.NameToLayer("Water"))
     {
-      Velocity = new Vector2(Velocity.x, 0.0f); IsWater = true; WaterAccel = 180.0f; Jumpable = true;
+      NextVelocity = new Vector2(NextVelocity.x, 0.0f); IsWater = true; WaterAccel = 180.0f; Jumpable = true;
       WaterDownShape.position = MyTransform.position + Vector3.down * 0.5f;
       WaterDownParticle.Play();
     }
@@ -232,7 +250,7 @@ public class Player_Move : MonoBehaviour
       WaterUpParticle.Play();
     }
   }
-  private void Update()
+  private void FixedUpdate()
   {
     UpdateMove();
   }
@@ -270,6 +288,7 @@ public class Player_Move : MonoBehaviour
   private IEnumerator respawn(float targetx,bool isleft)
   {
     yield return new WaitForSeconds(0.8f);
+    IsPressing = true;
     IsDead = false;
     Accel.x = AccelDegree*(isleft?1:-1);
     flipx = !isleft;

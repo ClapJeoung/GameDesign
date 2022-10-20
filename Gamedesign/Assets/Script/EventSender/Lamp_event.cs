@@ -15,8 +15,9 @@ public class Lamp_event : MonoBehaviour, Interactable
   public bool Ignitable = true;                      //불이 끝까지 다 붙었는지
   private Color CurrentColor = Color.white;           //투명도를 조절할 변수
   [SerializeField] private Light2D MyLight;           //조명
-  [SerializeField] private EventTarget MyEventTarget=null;
-  private enum LampType { Open, Close };
+  [SerializeField] private EventTarget[] MyActiveTargets = new EventTarget[0];
+  [SerializeField] private EventTarget[] MyDeactiveTargets = new EventTarget[0];
+  private enum LampType { Open, Close,Event };
   [SerializeField] private LampType MyLampType;
   public void Setup()
   {
@@ -56,8 +57,13 @@ public class Lamp_event : MonoBehaviour, Interactable
     {
       Progress = RequireTime; FiredParticle.Play(); Ignitable = false;
       // MyEventTarget.Active(); 
-      if(MyLampType==LampType.Open) GameManager.Instance.OpenMask(MyTransform.position);
-      else if(MyLampType==LampType.Close) GameManager.Instance.CloseMask(MyTransform.position);
+      if (MyLampType == LampType.Open) GameManager.Instance.OpenMask(MyTransform.position);
+      else if (MyLampType == LampType.Close) GameManager.Instance.CloseMask(MyTransform.position);
+      else
+      {
+        foreach (var target in MyActiveTargets) target.Active();
+        foreach (var target in MyDeactiveTargets) target.Deactive();
+      }
     }  //진행도가 최대치로 증가하면 끝
 
     MyTransform.localScale = Vector3.one * Mathf.Pow((Progress / RequireTime), 2);  //진행도에 비례해 크기 증가
@@ -68,9 +74,17 @@ public class Lamp_event : MonoBehaviour, Interactable
 
   private void OnDrawGizmos()
   {
-    if (MyEventTarget == null) return;
-
-    Gizmos.color = Color.red;
-    Gizmos.DrawLine(transform.position, MyEventTarget.transform.position);
+    if (MyActiveTargets.Length > 0)
+    {
+      Gizmos.color = Color.green;
+      for (int i = 0; i < MyActiveTargets.Length; i++)
+        Gizmos.DrawLine(transform.position, MyActiveTargets[i].transform.position);
+    }
+    if(MyDeactiveTargets.Length > 0)
+    {
+      Gizmos.color = Color.red;
+      for (int i = 0; i < MyDeactiveTargets.Length; i++)
+        Gizmos.DrawLine(transform.position, MyDeactiveTargets[i].transform.position);
+    }
   }
 }

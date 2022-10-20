@@ -17,7 +17,13 @@ public class GameManager : MonoBehaviour
   [SerializeField] private GameObject WaterUp = null;
   private Transform MyPlayer = null;
   [SerializeField] private FIreMask MyMask = null;
-  [HideInInspector] public Dimension WorldDimension = Dimension.A;
+  //  [HideInInspector] public Dimension WorldDimension = Dimension.A;
+  public StageCollider CurrentSC = null;
+  public void SetSC(ref StageCollider newsc)
+  {
+    newsc.CurrentDimension=CurrentSC.CurrentDimension;
+    CurrentSC = newsc;
+  }
   private void Awake()
   {
     if (instance == null) instance = this;
@@ -106,6 +112,6 @@ public class GameManager : MonoBehaviour
     wateruppar = WaterUp.GetComponent<ParticleSystem>();
   }
 
-  public void OpenMask(Vector2 newpos) { MyMask.Open(newpos); WorldDimension = Dimension.B; }
-  public void CloseMask(Vector2 newpos) { MyMask.Close(newpos); WorldDimension = Dimension.A; }
+  public void OpenMask(Vector2 newpos) { MyMask.Open(newpos); CurrentSC.CurrentDimension = Dimension.B; }
+  public void CloseMask(Vector2 newpos) { MyMask.Close(newpos); CurrentSC.CurrentDimension = Dimension.A; }
 }

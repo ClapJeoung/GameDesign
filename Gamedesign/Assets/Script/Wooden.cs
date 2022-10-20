@@ -23,16 +23,17 @@ public class Wooden : MonoBehaviour,Interactable
   [SerializeField] private Light2D MyLight = null;
   [SerializeField] private float MaxLightOuter = 2.0f;
   [SerializeField] private Dimension MyDimension;
+  private StageCollider MySC = null;
   private bool isactive = true;
   public bool IsActive
   {
-    get { if (GameManager.Instance.WorldDimension == Dimension.A) //월드가 A 차원일때
+    get { if (GameManager.Instance.CurrentSC.CurrentDimension == Dimension.A) //월드가 A 차원일때
       {
         if (MyDimension == Dimension.A ) return true; //나도 A면 활성화
 
         return false; //아니면 비활성화
       }
-    else if (GameManager.Instance.WorldDimension == Dimension.B)  //월드가 B 차원일때
+    else if (GameManager.Instance.CurrentSC.CurrentDimension == Dimension.B)  //월드가 B 차원일때
       {
         if (MyDimension == Dimension.B) return true; //나도 B면 활성화
 
@@ -70,7 +71,8 @@ public class Wooden : MonoBehaviour,Interactable
   }
   private void Update()
   {
-    if (!IsActive) return;  //!IsActive면 다 탔다는 뜻
+    if (GameManager.Instance.CurrentSC!=MySC||!IsActive) return;
+    //현재 게임매니저에 있는 스테이지 콜라이더가 내 스테이지 콜라이더랑 다르거나 다 탄 상태면 중지
 
     if ((Progress / RequireTime) < IgniteTime)  //연기가 나는 수준
     {
@@ -135,10 +137,11 @@ public class Wooden : MonoBehaviour,Interactable
   }
   public void Setup()
   {
+    MySC = transform.parent.GetComponent<StageCollider>();
     if (MyDimension == Dimension.A) Spr_B.enabled = false;
     else if(MyDimension== Dimension.B) Spr_A.enabled = false;  
   }
-  private void Awake()
+  private void Start()
   {
     Setup();
   }

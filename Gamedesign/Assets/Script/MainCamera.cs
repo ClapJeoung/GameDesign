@@ -17,11 +17,17 @@ public class MainCamera : MonoBehaviour
   [SerializeField] private int MinParticle = 50;
   [SerializeField] private int MaxParticle = 180;
   [SerializeField] private ParticleSystem RP_end = null;
+  [SerializeField] private ParticleSystem Particle_world = null;
+  private ParticleSystem.ShapeModule particle_world_shape;
+  [SerializeField] private ParticleSystem Particle_soul = null;
+  private ParticleSystem.ShapeModule particle_soul_shape;
   private void Setup()
   {
     MyTransform = transform;
     IsDead = true;
     RP_start_emission = RP_start.emission;
+    particle_world_shape = Particle_world.shape;
+    particle_soul_shape = Particle_soul.shape;
   }
   private void Start()
   {
@@ -29,6 +35,8 @@ public class MainCamera : MonoBehaviour
   }
   private void Update()
   {
+    particle_world_shape.position = new Vector3(MyTransform.position.x, MyTransform.position.y + 5.5f, -1.0f);
+    particle_soul_shape.position = new Vector3(MyTransform.position.x, -2.0f, -1.0f);
     if (IsDead) return;
     NewPos = Vector3.Lerp(MyTransform.position, PlayerTransform.position, Time.deltaTime * CameraSpeed);
     NewPos = new Vector3(NewPos.x, Mathf.Clamp(NewPos.y, MinY, MaxY), -10.0f);

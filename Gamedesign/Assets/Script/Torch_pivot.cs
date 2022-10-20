@@ -67,7 +67,7 @@ public class Torch_pivot : MonoBehaviour
     Vector3 _firepos = new Vector3(Mathf.Cos((CurrentRadius + 90.0f) * Mathf.Deg2Rad), Mathf.Sin((CurrentRadius + 90.0f) * Mathf.Deg2Rad));
 
     MyTrans.localPosition = PlayerTransform.position+ new Vector3(Length * _firepos.x, Length * _firepos.y, -1.0f);
-    FireTransform.localPosition = PlayerTransform.position + new Vector3(FireLength * _firepos.x, FireLength * _firepos.y, -1.0f);
+    FireTransform.localPosition = PlayerTransform.position + new Vector3(FireLength * _firepos.x, FireLength * _firepos.y, -1.1f);
     ColliderTransform.localPosition = PlayerTransform.position + new Vector3(FireLength * _firepos.x, FireLength * _firepos.y, -1.0f);
     MyTrans.eulerAngles = new Vector3(0, 0, CurrentRadius);
 
@@ -101,7 +101,7 @@ public class Torch_pivot : MonoBehaviour
       _currentpos = Vector2.Lerp(DeadPos, targetpos, Mathf.Sqrt(_time / movetime));
 
       MyTrans.localPosition = _currentpos + new Vector3(Length * _firepos.x, Length * _firepos.y, -1.0f);
-      FireTransform.localPosition = _currentpos + new Vector3(FireLength * _firepos.x, FireLength * _firepos.y, -1.0f);
+      FireTransform.localPosition = _currentpos + new Vector3(FireLength * _firepos.x, FireLength * _firepos.y, -1.1f);
       ColliderTransform.localPosition = _currentpos + new Vector3(FireLength * _firepos.x, FireLength * _firepos.y, -1.0f);
       MyTrans.eulerAngles = new Vector3(0, 0, CurrentRadius);
 

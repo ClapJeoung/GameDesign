@@ -12,8 +12,10 @@ public class Rock : MonoBehaviour
   [SerializeField] private float Gravity = -9.8f;
   private int Conveyor = 0;
   [SerializeField] private float ConveyorSpeed = 5.0f;
+  private StageCollider MySC = null;
   public void Setup()
   {
+    MySC = transform.parent.GetComponent<StageCollider>();
     MyTransform = transform;
     Bounds mybound=MyCol.bounds;
     mybound.Expand(0.01f);
@@ -86,6 +88,8 @@ public class Rock : MonoBehaviour
   }
   private void Update()
   {
+    if (GameManager.Instance.CurrentSC != MySC) return; //현재 스테이지가 내 스테이지가 아니라면 대기
+
     Velocity.y = Gravity;
 
     VerticalRaycast();
