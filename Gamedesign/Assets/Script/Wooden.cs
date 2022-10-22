@@ -10,6 +10,7 @@ public class Wooden : MonoBehaviour,Interactable
   private float Progress = 0.0f;                    //현재 진척도
   [SerializeField] private SpriteRenderer Spr_A = null; //일반 상태 이미지
   [SerializeField] private SpriteRenderer Spr_B = null; //다른 차원 이미지
+  [SerializeField] private SpriteRenderer Spr_C = null; //대기 상태 이미지
   [SerializeField] private Transform FireTransform = null;//화염 이미지 트랜스폼
   private bool IsFired = false;                     //불이 올라와있는지
   [SerializeField] private ParticleSystem SmokeParticle = null;//검은 연기 파티클
@@ -25,6 +26,7 @@ public class Wooden : MonoBehaviour,Interactable
   [SerializeField] private Dimension MyDimension;
   private StageCollider MySC = null;
   private bool isactive = true;
+  private Dimension OriginDimension;
   public bool IsActive
   {
     get { if (GameManager.Instance.CurrentSC.CurrentDimension == Dimension.A) //월드가 A 차원일때
@@ -138,11 +140,29 @@ public class Wooden : MonoBehaviour,Interactable
   public void Setup()
   {
     MySC = transform.parent.GetComponent<StageCollider>();
+    MySC.SetOrigin(this);
+    Spr_B.size = Spr_A.size;
+    Spr_C.size = Spr_B.size;
+    GetComponent<BoxCollider2D>().size= Spr_A.size;
+    ParticleSystem.ShapeModule myshape = FiredParticle.shape;
+    myshape.scale =new Vector3( Spr_A.size.x,0.3f,1.0f);
     if (MyDimension == Dimension.A) Spr_B.enabled = false;
-    else if(MyDimension== Dimension.B) Spr_A.enabled = false;  
+    else if(MyDimension== Dimension.B) Spr_A.enabled = false;
+    OriginDimension = MyDimension;
   }
   private void Start()
   {
     Setup();
+  }
+  public void ResetDimension()
+  {
+   if( MyDimension != OriginDimension)
+    {
+      MyDimension = OriginDimension;
+      FiredParticle.Play();
+      if (MyDimension == Dimension.B) { Spr_A.enabled = false; Spr_B.enabled = true; }
+      else if (MyDimension == Dimension.A) { Spr_B.enabled = false; Spr_A.enabled = true;  }
+    }
+
   }
 }

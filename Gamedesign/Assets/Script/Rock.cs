@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Rock : MonoBehaviour
 {
-  [SerializeField] private BoxCollider2D MyCol = null;
   [SerializeField] private int VertexCount = 5;
   private Transform MyTransform = null;
   private Vector2[] BottomVertex = null;
@@ -13,11 +12,18 @@ public class Rock : MonoBehaviour
   private int Conveyor = 0;
   [SerializeField] private float ConveyorSpeed = 5.0f;
   private StageCollider MySC = null;
+  private Vector2 Originpos = Vector2.zero;
+  private bool IsPlaying = false;
+  private float ResetTime = 3.0f;
   public void Setup()
   {
     MySC = transform.parent.GetComponent<StageCollider>();
+    MySC.SetOrigin(this);
     MyTransform = transform;
-    Bounds mybound=MyCol.bounds;
+    Originpos = MyTransform.position;
+    BoxCollider2D _mycol = GetComponent<BoxCollider2D>();
+    _mycol.size = GetComponent<SpriteRenderer>().size;
+    Bounds mybound= _mycol.bounds;
     mybound.Expand(0.01f);
     BottomVertex = new Vector2[VertexCount];
     float _width = mybound.size.x;
@@ -96,5 +102,19 @@ public class Rock : MonoBehaviour
 
     if (Velocity.y <= 0.05f && Velocity.y >= -0.05f) Velocity.y = 0;
     MyTransform.Translate((Velocity + Vector2.right * ConveyorSpeed * Conveyor) * Time.deltaTime);
+  }
+  public void Resetpos() => StartCoroutine(resetpos());
+  private IEnumerator resetpos()
+  {
+    IsPlaying = false;
+    float _time = 0.0f;
+    Vector2 _currentpos = MyTransform.position;
+    while (_time < ResetTime)
+    {
+      MyTransform.position=Vector2.Lerp(_currentpos,Originpos,Mathf.Sqrt(_time/ResetTime));
+      _time += Time.deltaTime;
+      yield return null;
+    }
+    IsPlaying = true;
   }
 }

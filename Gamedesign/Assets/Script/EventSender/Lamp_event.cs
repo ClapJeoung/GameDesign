@@ -17,7 +17,7 @@ public class Lamp_event : MonoBehaviour, Interactable
   [SerializeField] private Light2D MyLight;           //조명
   [SerializeField] private EventTarget[] MyActiveTargets = new EventTarget[0];
   [SerializeField] private EventTarget[] MyDeactiveTargets = new EventTarget[0];
-  private enum LampType { Open, Close,Event };
+  private enum LampType {Dimension,Event };
   [SerializeField] private LampType MyLampType;
   public void Setup()
   {
@@ -28,6 +28,7 @@ public class Lamp_event : MonoBehaviour, Interactable
     MyTransform.localScale = Vector3.zero;
     BasicParticle.Stop();
     MyLight.intensity = 0.0f;
+    transform.parent.GetComponent<StageCollider>().SetOrigin(this);
   }
   private void Start()
   {
@@ -55,15 +56,23 @@ public class Lamp_event : MonoBehaviour, Interactable
 
     if (Progress > RequireTime)
     {
-      Progress = RequireTime; FiredParticle.Play(); Ignitable = false;
+      Progress = RequireTime; FiredParticle.Play();
       // MyEventTarget.Active(); 
-      if (MyLampType == LampType.Open) GameManager.Instance.OpenMask(MyTransform.position);
-      else if (MyLampType == LampType.Close) GameManager.Instance.CloseMask(MyTransform.position);
+      if (MyLampType == LampType.Dimension)
+      {
+       if( GameManager.Instance.CurrentSC.CurrentDimension==Dimension.A)
+        GameManager.Instance.OpenMask(MyTransform.position);
+       else GameManager.Instance.CloseMask(MyTransform.position);
+        Progress = 0.0f;
+        Ignited = false;
+      }
       else
       {
-        foreach (var target in MyActiveTargets) target.Active();
-        foreach (var target in MyDeactiveTargets) target.Deactive();
+        foreach (var target in MyActiveTargets) if (target != null) target.Active();
+        foreach (var target in MyDeactiveTargets) if (target != null) target.Deactive();
+        Ignitable = false;
       }
+      MyTransform.localScale = Vector3.zero;
     }  //진행도가 최대치로 증가하면 끝
 
     MyTransform.localScale = Vector3.one * Mathf.Pow((Progress / RequireTime), 2);  //진행도에 비례해 크기 증가
@@ -78,13 +87,18 @@ public class Lamp_event : MonoBehaviour, Interactable
     {
       Gizmos.color = Color.green;
       for (int i = 0; i < MyActiveTargets.Length; i++)
-        Gizmos.DrawLine(transform.position, MyActiveTargets[i].transform.position);
+       if(MyActiveTargets[i]!=null) Gizmos.DrawLine(transform.position, MyActiveTargets[i].transform.position);
     }
     if(MyDeactiveTargets.Length > 0)
     {
       Gizmos.color = Color.red;
       for (int i = 0; i < MyDeactiveTargets.Length; i++)
-        Gizmos.DrawLine(transform.position, MyDeactiveTargets[i].transform.position);
+        if (MyActiveTargets[i] != null) Gizmos.DrawLine(transform.position, MyDeactiveTargets[i].transform.position);
     }
+  }
+  public void ResetLamp()
+  {
+    Ignitable = true;
+    Progress = 0.0f;
   }
 }

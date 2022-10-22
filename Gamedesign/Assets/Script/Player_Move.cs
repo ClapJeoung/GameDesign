@@ -61,6 +61,7 @@ public class Player_Move : MonoBehaviour
   private bool flipx = true;
   private bool IsPlaying = true;
   private bool IsPressing = false;
+  private float Expanddegree = 0.01f;
   public void Setup()
   {
     MyTransform = transform;
@@ -69,7 +70,7 @@ public class Player_Move : MonoBehaviour
     Bounds MyBound = Col.bounds;
     Vertex_top = new Vector2[VertexCount]; Vertex_bottom = new Vector2[VertexCount];
     Vertex_right = new Vector2[VertexCount]; Vertex_left = new Vector2[VertexCount]; //버텍스 개수 설정
-    MyBound.Expand(-0.025f);
+    MyBound.Expand(-Expanddegree);
     float _width = MyBound.size.x;
     float _height = MyBound.size.y;
     float _size_width = _width / (VertexCount-1);
@@ -86,7 +87,7 @@ public class Player_Move : MonoBehaviour
     WaterDownShape = WaterDownParticle.shape;
     WaterUpShape = WaterUpParticle.shape;
     DeadShape = DeadParticle.shape;
-    MyBound.Expand(+0.025f);
+    MyBound.Expand(+Expanddegree);
     IsDead = true;
     IsPlaying = false;
   }
@@ -94,6 +95,11 @@ public class Player_Move : MonoBehaviour
   {
     Setup();
     GameManager.Instance.SetNewPlayer(this.transform);
+  }
+  public void Restart() => StartCoroutine(restart());
+  private IEnumerator restart()
+  {
+    yield return StartCoroutine(dead());
   }
   private void UpdateMove()
   {
@@ -109,6 +115,7 @@ public class Player_Move : MonoBehaviour
         WaterAccel += Time.deltaTime * WaterSpeed;
         Accel.y = (Mathf.Cos(Mathf.Deg2Rad * WaterAccel) * FloatingDegree);
       }
+      if (Input.GetKeyDown(KeyCode.R)) Restart(); //R을 누르면 마지막 저장지점에서 재시작
 
       Accel.x = 0;
       if (Input.GetKey(KeyCode.D)) { Accel.x = AccelDegree; flipx = false; IsPressing = true; }                      //좌측 버튼 : 가속도가 +
@@ -116,6 +123,7 @@ public class Player_Move : MonoBehaviour
       else {
         IsPressing = false;
         Accel.x = (NextVelocity.x != 0 ? Mathf.Sign(NextVelocity.x) : 0) * AccelResist; }//아무것도 안 누름 : 가속도가 속도 반대로
+
     }
 
     if (Input.GetKey(KeyCode.Space) && Jumpable) Jump();//점프
@@ -159,8 +167,8 @@ public class Player_Move : MonoBehaviour
     Vector2 _dir = NextVelocity.y <= 0?Vector2.down : Vector2.up;      //선이 발사되는 위치
     Vector3 _newpos = Vector3.zero;                               //선이 시작되는 위치(플레이어 기준)
     int _layermask;          //레이어마스크(int)
-    float _distance = 0.025f+ Mathf.Abs(NextVelocity.y) * Time.deltaTime;                //선이 발사되는 거리
-    if (_distance == 0.0f) _distance = 0.025f;
+    float _distance = Expanddegree+ Mathf.Abs(NextVelocity.y) * Time.deltaTime;                //선이 발사되는 거리
+    if (_distance == 0.0f) _distance = Expanddegree;
     RaycastHit2D _hit;                                            //선이 발사되고 닿은 곳의 정보
     Conveyor = 0; //컨베이어 초기화
 
@@ -177,7 +185,7 @@ public class Player_Move : MonoBehaviour
 
         if (NextVelocity.y < 0) { Jumpable = true; JumpTime = 0.0f; }
 
-        NextVelocity = new Vector2(NextVelocity.x,(_hit.distance- 0.025f )* _dir.y);
+        NextVelocity = new Vector2(NextVelocity.x,(_hit.distance- Expanddegree )* _dir.y);
         //      Debug.Log(_hit.transform.tag);
         Debug.DrawRay(_newpos, _dir * _hit.distance, Color.green);
 
@@ -207,8 +215,8 @@ public class Player_Move : MonoBehaviour
     Vector2 _dir = NextVelocity.x >= 0 ? Vector2.right : Vector2.left;      //선이 발사되는 방향
     Vector3 _newpos = Vector3.zero;                               //선이 시작되는 위치(플레이어 기준)
     int _layermask = 1 << LayerMask.NameToLayer("Wall");          //레이어마스크(int)
-    float _distance = 0.025f+ Mathf.Abs(NextVelocity.x) * Time.deltaTime;                //선이 발사되는 거리
-    if (_distance == 0.0f) _distance = 0.025f;
+    float _distance = Expanddegree+ Mathf.Abs(NextVelocity.x) * Time.deltaTime;                //선이 발사되는 거리
+    if (_distance == 0.0f) _distance = Expanddegree;
     RaycastHit2D _hit;                                            //선이 발사되고 닿은 곳의 정보
 
 
@@ -225,7 +233,7 @@ public class Player_Move : MonoBehaviour
         if (_hit.transform.TryGetComponent<Wooden>(out iswooden) && !iswooden.IsActive) continue; //목재 비활성화면 무시
 
         //   NextVelocity = new Vector2((_hit.distance>0.1f?_hit.distance - 0.1f:_hit.distance)*_dir.x,NextVelocity.y );
-        NextVelocity = new Vector2( (_hit.distance- 0.025f) * _dir.x, NextVelocity.y);
+        NextVelocity = new Vector2( (_hit.distance- Expanddegree) * _dir.x, NextVelocity.y);
         Debug.DrawRay(_newpos, _dir * _hit.distance, Color.green);
         break;
       }

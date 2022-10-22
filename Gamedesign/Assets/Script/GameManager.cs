@@ -42,8 +42,14 @@ public class GameManager : MonoBehaviour
   public void SetNewRespawn(RespawnObj newrespawn) => MyRespawn = newrespawn;
   public void Dead()  //플레이어 사망 즉시 호출
   {
+    if (CurrentSC.CurrentDimension != CurrentSC.DefaultDimension)
+    {
+      if (CurrentSC.DefaultDimension == Dimension.A) CloseMask(MyPlayer.position);
+      else OpenMask(MyPlayer.position);
+    }
     MyTorchPivot.Dead();
     MyTorch.Dead();
+    CurrentSC.ResetStage();
   }
   public void Spawn()   //게임 최초 시작
   {
