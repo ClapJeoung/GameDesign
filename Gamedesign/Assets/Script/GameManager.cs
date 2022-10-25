@@ -120,4 +120,5 @@ public class GameManager : MonoBehaviour
 
   public void OpenMask(Vector2 newpos) { MyMask.Open(newpos); CurrentSC.CurrentDimension = Dimension.B; }
   public void CloseMask(Vector2 newpos) { MyMask.Close(newpos); CurrentSC.CurrentDimension = Dimension.A; }
+  public void PlayRPParticle() => MyCamera.StartRPParticle();
 }

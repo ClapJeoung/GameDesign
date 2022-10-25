@@ -51,6 +51,7 @@ public class MainCamera : MonoBehaviour
     StartCoroutine(moveto(newpos,waittime));
     return RespawnMovetime + 0.1f;
   }
+  public void StartRPParticle() => RP_start.Play();
   private IEnumerator moveto(Vector3 newpos,float waittime)
   {
     IsDead = true;
@@ -59,19 +60,19 @@ public class MainCamera : MonoBehaviour
     Vector3 _newpos = newpos + Vector3.back * 10.0f;
     float _particlerate = MinParticle;
    // RP_start_emission.rateOverTime = _particlerate;
-   // RP_start.Play();
+  //  RP_start.Play();
     while (_time < RespawnMovetime)
     {
       NewPos = Vector3.Lerp(_originpos, _newpos,Mathf.Pow(_time/ RespawnMovetime,2.5f));
       NewPos = new Vector3(NewPos.x, Mathf.Clamp(NewPos.y, MinY, MaxY), -10.0f);
       MyTransform.position = NewPos;
-      _particlerate = Mathf.Lerp(MinParticle, MaxParticle, Mathf.Pow((_time / RespawnMovetime), 2.0f));
-      RP_start_emission.rateOverTime=_particlerate;
+     // _particlerate = Mathf.Lerp(MinParticle, MaxParticle, Mathf.Pow((_time / RespawnMovetime), 2.0f));
+     // RP_start_emission.rateOverTime=_particlerate;
       _time += Time.deltaTime;
       yield return null;
     }
     yield return new WaitForSeconds(waittime);
-  //  RP_start.Stop();
+   RP_start.Stop();
   //  RP_end.Play();
     IsDead = false;
   }

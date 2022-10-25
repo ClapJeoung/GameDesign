@@ -10012,7 +10012,6 @@ MonoBehaviour:
   Spr_A: {fileID: 1465795382739487706}
   Spr_B: {fileID: 2625924382662253110}
   Spr_C: {fileID: 2625924382801127537}
-  MyCol: {fileID: 1465795382739487704}
   FireTransform: {fileID: 1465795382600086450}
   SmokeParticle: {fileID: 1465795381007332180}
   BurningParticle: {fileID: 1465795382207663138}
@@ -15081,7 +15080,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 2, y: 2}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1

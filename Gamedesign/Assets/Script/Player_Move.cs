@@ -269,6 +269,7 @@ public class Player_Move : MonoBehaviour
     IsDead = true;
     IsPlaying = false;
     yield return new WaitForSeconds(1.0f);
+    GameManager.Instance.PlayRPParticle();
     Vector3 _originpos = MyTransform.position;
     for(int i = 0; i < ShakeCount; i++)
     {

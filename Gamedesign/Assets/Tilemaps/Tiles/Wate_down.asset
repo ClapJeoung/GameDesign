@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 13312, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: Tile_temp_2
+  m_Name: Wate_down
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: 1708552292, guid: ca7f1f35e81abe04db2e32d711eea75f, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 9e772f4202fd8d042844a79276845b0f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1
