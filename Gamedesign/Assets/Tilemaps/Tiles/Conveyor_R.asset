@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Conveyor_R
   m_EditorClassIdentifier: 
   m_AnimatedSprites:
-  - {fileID: 376623092, guid: 4677aa2e526801a48803389964006f70, type: 3}
-  - {fileID: -549259311, guid: 4677aa2e526801a48803389964006f70, type: 3}
-  m_MinSpeed: 1.5
-  m_MaxSpeed: 1.5
+  - {fileID: -1091362385, guid: fdf5c2025187e3f498f76f6aebd71752, type: 3}
+  - {fileID: -1118372676, guid: fdf5c2025187e3f498f76f6aebd71752, type: 3}
+  m_MinSpeed: 8
+  m_MaxSpeed: 8
   m_AnimationStartTime: 0
   m_AnimationStartFrame: 0
   m_TileColliderType: 1

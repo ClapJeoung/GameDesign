@@ -12,6 +12,7 @@ TagManager:
   - Conveyor_R
   - Water
   - Rock
+  - Spike
   layers:
   - Default
   - TransparentFX

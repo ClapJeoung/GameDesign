@@ -12,9 +12,10 @@ public class Rock : MonoBehaviour
   private int Conveyor = 0;
   [SerializeField] private float ConveyorSpeed = 5.0f;
   private StageCollider MySC = null;
-  private Vector2 Originpos = Vector2.zero;
+  private Vector3 Originpos = Vector2.zero;
   private bool IsPlaying = false;
   private float ResetTime = 3.0f;
+  [HideInInspector] public bool IsLanding = false;
   public void Setup()
   {
     MySC = transform.parent.GetComponent<StageCollider>();
@@ -36,7 +37,7 @@ public class Rock : MonoBehaviour
   }
   private void Start()
   {
-    Setup();
+   Invoke("Setup",0.01f);
   }
   private void VerticalRaycast()
   {
@@ -53,16 +54,7 @@ public class Rock : MonoBehaviour
       _doitagain = false;
 
       _hit = Physics2D.RaycastAll(_newpos, Vector2.down,_distance, 1 << LayerMask.NameToLayer("Wall"));
-   //   Debug.DrawRay(_newpos, Vector3.down, Color.red, _distance);
 
-      if (_hit.Length == 0) continue;
-
-      string _name = "걸린거 : ";
-      for(int j = 0; j < _hit.Length; j++)
-      {
-        _name += _hit[j].transform.name + " ";
-      }
- //     Debug.Log(_name);
       for(int j=_hit.Length-1; j>=0; j--)
       {
         _targethit = _hit[j]; //_hit의 맨 뒤부터(제일 먼저 걸린 것부터) _targethit에 대입
@@ -81,20 +73,22 @@ public class Rock : MonoBehaviour
         if (_targethit.transform.TryGetComponent<Wooden>(out iswooden) && !iswooden.IsActive) continue; //목재 비활성화면 무시
 
         Velocity.y = _targethit.distance * -1;
-   //     Debug.DrawRay((Vector2)MyTransform.position + BottomVertex[i], Vector3.down, Color.green,_targethit.distance);
-        //    Debug.Log(_hit.transform.tag);
 
         if (_targethit.transform.CompareTag("Breakable"))
           _targethit.transform.GetComponent<Breakable>().Pressed(); //밟아서 부숴지는 이벤트 실행
         else if (_targethit.transform.CompareTag("Conveyor_R")) Conveyor = 1;
         else if (_targethit.transform.CompareTag("Conveyor_L")) Conveyor = -1;
+
+        IsLanding = true;     //이 오브젝트는 땅에 붙어있다
+
         break;
       }
+      else IsLanding = false; //이 오브젝트는 땅에 붙어있지 않다
     }
   }
   private void Update()
   {
-    if (GameManager.Instance.CurrentSC != MySC) return; //현재 스테이지가 내 스테이지가 아니라면 대기
+    if (GameManager.Instance.CurrentSC != MySC) return; //현재 스테이지가 내 스테이지가 아니라면 물리효과 대기
 
     Velocity.y = Gravity;
 
@@ -108,10 +102,10 @@ public class Rock : MonoBehaviour
   {
     IsPlaying = false;
     float _time = 0.0f;
-    Vector2 _currentpos = MyTransform.position;
+    Vector3 _currentpos = MyTransform.position;
     while (_time < ResetTime)
     {
-      MyTransform.position=Vector2.Lerp(_currentpos,Originpos,Mathf.Sqrt(_time/ResetTime));
+      MyTransform.position=Vector3.Lerp(_currentpos,Originpos,Mathf.Sqrt(_time/ResetTime));
       _time += Time.deltaTime;
       yield return null;
     }

@@ -46,22 +46,27 @@ public class Player_Move : MonoBehaviour
   private bool IsWater = false;      //물 속에 있는지
   private bool IsDead = false;  //사망 시 모든 활동 정지시키기
   [Space(5)]
-  [SerializeField] private int ShakeCount = 55;
-  [SerializeField] private float ShakeTime = 4.0f;
-  [SerializeField] private float ShakeDegree = 0.05f;
-  [SerializeField] private SpriteRenderer MySpr = null;
-  [SerializeField] private Animator MyAnimator = null;
+  [SerializeField] private int Dead_ShakeCount = 55;        //사망 시 흔들리는 횟수
+  [SerializeField] private float Dead_ShakeTime = 4.0f;     //사망 시 흔들리는 시간
+  [SerializeField] private float Dead_ShakeDegree = 0.05f;  //사망 시 흔들리는 정도
+  [SerializeField] private SpriteRenderer MySpr = null;     //내 스프라이트랜더러
+  [SerializeField] private Animator MyAnimator = null;      //내 애니메이터
   [Space(5)]
-  [SerializeField] private ParticleSystem WaterDownParticle = null;
+  [SerializeField] private ParticleSystem WaterDownParticle = null; //물 첨벙 파티클
   private ParticleSystem.ShapeModule WaterDownShape;
-  [SerializeField] private ParticleSystem WaterUpParticle = null;
+  [SerializeField] private ParticleSystem WaterUpParticle = null;   //물에서 나오는 파티클
   private ParticleSystem.ShapeModule WaterUpShape;
-  [SerializeField] private ParticleSystem DeadParticle = null;
-  private ParticleSystem.ShapeModule DeadShape;
-  private bool flipx = true;
-  private bool IsPlaying = true;
-  private bool IsPressing = false;
-  private float Expanddegree = 0.01f;
+  [SerializeField] private ParticleSystem DeadParticle_body = null; //피 부왘
+  private ParticleSystem.ShapeModule DeadShape_body;
+  [SerializeField] private ParticleSystem DeadParticle_soul = null; //플레이어 불타는 파티클
+  private ParticleSystem.ShapeModule DeadShape_soul;
+  private bool flipx = true;                  //이미지 좌우반전용 변수
+  private bool IsPlaying = true;              //현재 조작 가능한 상태인가?
+  private bool IsPressing = false;            //현재 A나 D를 누르고 있는가?
+  private float Expanddegree = 0.01f;         //콜라이더 감지 확장 범위
+  [SerializeField] private Torch MyTorch = null;
+  [SerializeField] private GameObject SkullPrefab = null;
+  [SerializeField] private Transform SkullHolder = null;
   public void Setup()
   {
     MyTransform = transform;
@@ -86,7 +91,8 @@ public class Player_Move : MonoBehaviour
     MyTransform.localScale = Vector3.zero;
     WaterDownShape = WaterDownParticle.shape;
     WaterUpShape = WaterUpParticle.shape;
-    DeadShape = DeadParticle.shape;
+    DeadShape_body = DeadParticle_body.shape;
+    DeadShape_soul=DeadParticle_soul.shape;
     MyBound.Expand(+Expanddegree);
     IsDead = true;
     IsPlaying = false;
@@ -99,7 +105,7 @@ public class Player_Move : MonoBehaviour
   public void Restart() => StartCoroutine(restart());
   private IEnumerator restart()
   {
-    yield return StartCoroutine(dead());
+    yield return StartCoroutine(dead_body(Vector2.zero,false));
   }
   private void UpdateMove()
   {
@@ -115,7 +121,6 @@ public class Player_Move : MonoBehaviour
         WaterAccel += Time.deltaTime * WaterSpeed;
         Accel.y = (Mathf.Cos(Mathf.Deg2Rad * WaterAccel) * FloatingDegree);
       }
-      if (Input.GetKeyDown(KeyCode.R)) Restart(); //R을 누르면 마지막 저장지점에서 재시작
 
       Accel.x = 0;
       if (Input.GetKey(KeyCode.D)) { Accel.x = AccelDegree; flipx = false; IsPressing = true; }                      //좌측 버튼 : 가속도가 +
@@ -242,11 +247,26 @@ public class Player_Move : MonoBehaviour
   }
   private void OnTriggerEnter2D(Collider2D collision)
   {
-    if (collision.gameObject.layer ==  LayerMask.NameToLayer("Water"))
+    if (IsDead) return;
+    if (collision.gameObject.layer ==  LayerMask.NameToLayer("Water") && IsPlaying)  //물에 닿았으면
     {
       NextVelocity = new Vector2(NextVelocity.x, 0.0f); IsWater = true; WaterAccel = 180.0f; Jumpable = true;
+      //바로 물에 들어가 있는 속도로 변경
       WaterDownShape.position = MyTransform.position + Vector3.down * 0.5f;
-      WaterDownParticle.Play();
+      WaterDownParticle.Play(); //퐁당 파티클 위치 설정하고 실행
+    }
+    else if (collision.CompareTag("Spike") && IsPlaying) //가시에 닿았으면 육체 죽음
+    {
+      Vector2 _spikepos = collision.ClosestPoint(MyTransform.position)-(Vector2)MyTransform.position;
+
+      Dead_body(_spikepos, false);
+    }
+    else if (collision.CompareTag("Rock"))  //돌에 닿았고
+    {
+      if (!collision.GetComponent<Rock>().IsLanding&&IsPlaying)
+      {
+        Dead_body(Vector2.up*-GetComponent<BoxCollider2D>().bounds.size.y/2,true);
+      }//그 돌이 떨어지는 상태라면 육체 죽음
     }
   }
   private void OnTriggerExit2D(Collider2D collision)
@@ -258,74 +278,129 @@ public class Player_Move : MonoBehaviour
       WaterUpParticle.Play();
     }
   }
+  private void Update()
+  {
+    if (Input.GetKeyDown(KeyCode.R) && IsPlaying) Restart(); //R을 누르면 마지막 저장지점에서 재시작
+  }
   private void FixedUpdate()
   {
     UpdateMove();
   }
-  public void Dead() => StartCoroutine(dead());
-  private IEnumerator dead()
+  public void Dead_body(Vector2 bloodpos,bool isrock)         //가시에 찔려서 육체적 사망
   {
-    GameManager.Instance.Dead();
-    IsDead = true;
+    StartCoroutine(dead_body(bloodpos, isrock));
+  }
+  private IEnumerator dead_body(Vector2 bloodpos,bool isrock)
+  {
     IsPlaying = false;
-    yield return new WaitForSeconds(1.0f);
-    GameManager.Instance.PlayRPParticle();
-    Vector3 _originpos = MyTransform.position;
-    for(int i = 0; i < ShakeCount; i++)
+    MyTorch.Dead();
+
+    Vector2 _bloodrot = Vector2.up * 90.0f + Vector2.right * (-Mathf.Atan2(bloodpos.y, bloodpos.x) * Mathf.Rad2Deg);
+
+    DeadShape_body.position = MyTransform.position + (Vector3)bloodpos + Vector3.back;
+    DeadShape_body.rotation = _bloodrot;
+    DeadParticle_body.Play();           //지벳
+
+    if (bloodpos.y<=0) yield return new WaitForSeconds(0.15f); //조작만 중지시키고 대충 바닥에 닿을 때까지 대기
+
+    IsDead = true;
+    IsWater = false;
+
+    yield return new WaitForSeconds(1.5f);  //피 튀기는 연출 끝내고
+
+    if (!isrock)  //가시 찔린거면 사망 연출 필요하니까 
     {
-      MyTransform.position = _originpos + new Vector3 (Random.Range(-ShakeDegree, ShakeDegree), Random.Range(-ShakeDegree, ShakeDegree))+Vector3.back*2;
-      yield return new WaitForSeconds(ShakeTime / ShakeCount);
+      Vector3 _originpos = MyTransform.position;
+      for (int i = 0; i < Dead_ShakeCount; i++) //진동
+      {
+        MyTransform.position = _originpos + new Vector3(Random.Range(-Dead_ShakeDegree, Dead_ShakeDegree), Random.Range(-Dead_ShakeDegree, Dead_ShakeDegree)) + Vector3.back * 2;
+        yield return new WaitForSeconds(Dead_ShakeTime / Dead_ShakeCount);
+      }
+      MyTransform.position = _originpos;
+      MyTransform.localScale = Vector3.zero;    //진동 끝나면
+      DeadShape_soul.position = MyTransform.position;
+      DeadParticle_soul.Play();                       //증발 파티클 실행
+      Instantiate(SkullPrefab, SkullHolder).GetComponent<Skull>().Setup(MyTransform.position , 2); //피 튀긴 위치에 샌즈
     }
-    MyTransform.position = _originpos;
+    else { MyTransform.localScale = Vector3.zero; 
+      Instantiate(SkullPrefab, SkullHolder).GetComponent<Skull>().Setup(MyTransform.position , 2); }
+    //바위에 깔린거면 흔적도 남지 않고 안보이게
 
-    MyTransform.localScale = Vector3.zero;
-    DeadShape.position = MyTransform.position;
-    DeadParticle.Play();
+      GameManager.Instance.Dead_body(); //현재 차원 및 오브젝트 초기화
+    GameManager.Instance.PlayRPParticle();  //화면 회전하는 파티클
 
-    yield return new WaitForSeconds(1.0f);
-
-    GameManager.Instance.Respawn();
+    GameManager.Instance.Respawn();                   //리스폰
     yield return null;
   }
-  public void Respawn(Vector2 newpos,float targetx,bool isleft) //리스폰
+
+  public void Dead_soul()         //불이 꺼져 영구적 사망
+  {
+    StartCoroutine(dead_soul());
+  }
+  private IEnumerator dead_soul ()
+  {
+    GameManager.Instance.Dead_soul_0(); //횃불 대신 멈춰주는 함수
+    IsDead = true;
+    IsPlaying = false;
+    IsWater = false;
+
+    yield return new WaitForSeconds(1.0f);  //연기까지 다 사라지는 시간(대충)
+
+    Vector3 _originpos = MyTransform.position;  //Dead_ShakeTime동안 진동
+    for(int i = 0; i < Dead_ShakeCount; i++)
+    {
+      MyTransform.position = _originpos + new Vector3 (Random.Range(-Dead_ShakeDegree, Dead_ShakeDegree), Random.Range(-Dead_ShakeDegree, Dead_ShakeDegree))+Vector3.back*2;
+      yield return new WaitForSeconds(Dead_ShakeTime / Dead_ShakeCount);
+    }
+    MyTransform.position = _originpos;        //진동이 종료되면
+    MyTransform.localScale = Vector3.zero;    //플레이어의 크기는 0이 되어 시야에서 사라짐
+
+    DeadShape_soul.position = MyTransform.position;  //사망 파티클 위치 조정하고
+    DeadParticle_soul.Play();                        //사망 파티클 실행
+
+    yield return new WaitForSeconds(1.0f);      //사망 파티클 사라질때까지 잠시 대기
+
+    GameManager.Instance.Dead_soul_1();         //주위가 정지하고 사망 텍스트 출력 시작
+    yield return null;
+  }
+  public void Respawn(Vector2 newpos,float targetx) //리스폰
   {
     MyTransform.position = (Vector3)newpos + Vector3.back * 2;          //위치로 이동하고
     MyTransform.localScale = Vector3.one;
-    Debug.Log($"isleft : {isleft}  newpos.x : {newpos.x}  targetpos.x : {targetx}");
-    StartCoroutine(respawn(targetx, isleft));  //코루틴 시작
+  //  Debug.Log($"isleft : {isleft}  newpos.x : {newpos.x}  targetpos.x : {targetx}");
+    StartCoroutine(respawn(targetx));  //코루틴 시작
   }
-  private IEnumerator respawn(float targetx,bool isleft)
+  private IEnumerator respawn(float targetx)
   {
     yield return new WaitForSeconds(0.8f);
     IsPressing = true;
     IsDead = false;
-    Accel.x = AccelDegree*(isleft?1:-1);
-    flipx = !isleft;
-    if (isleft)
-    {
+    Accel.x = AccelDegree;
+    flipx = false;
       yield return new WaitUntil(() => { return MyTransform.position.x >= targetx; });
-    }
-    else
-    {
-      yield return new WaitUntil(() => { return MyTransform.position.x <= targetx; });
-    }
     Debug.Log("새로운 시작인 레후~");
+    IsWater = false;
     IsPlaying = true;
   }
-  private IEnumerator respawn_old(float spawningtime) //구 리스폰 연출
+  public void EndingEngage()
+  {
+    IsDead = true;
+    IsPlaying = false;
+    MySpr.flipX = false;
+  }
+  public void Ending(Vector2 newpos, float movetime)
+  {
+    StartCoroutine(ending(newpos, movetime));
+  }
+  private IEnumerator ending(Vector2 newpos,float movetime)
   {
     float _time = 0.0f;
-    while (_time < spawningtime)  //spawningtime동안 1.0까지 점점 커짐
+    Vector2 _oldpos = MyTransform.position;
+    while(_time< movetime)
     {
-      MyTransform.localScale = Vector3.one * Mathf.Lerp(0, 1.0f,Mathf.Pow(_time / spawningtime,3.0f));
+      MyTransform.position = Vector3.Lerp(_oldpos, newpos, _time / movetime)+Vector3.back*3.0f;
       _time += Time.deltaTime;
       yield return null;
     }
-    MyTransform.localScale = Vector3.one;
-
-    IsDead = false;           //크기 원상복구됐으면 프로퍼티 초기화
-    IsWater = false;
-    Accel = Vector2.zero;
-    Velocity = Vector2.zero;
   }
 }

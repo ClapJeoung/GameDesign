@@ -8,13 +8,16 @@ public class WaterDrop : MonoBehaviour
   [SerializeField] private Transform MyTransform = null;
   [SerializeField] private SpriteRenderer MyRenderer = null;
   [SerializeField] private ParticleSystem MyParticle = null;
+  [SerializeField] private float SizeupTime = 0.5f;
 
-  public void Fall(Vector2 newpos)
+  public void Fall(Vector3 newpos)
   {
+    MyTransform.localScale = Vector3.zero;
     MyTransform.localPosition = newpos;
     MyTransform.tag = "Water";
     MyRenderer.enabled = true;
     StartCoroutine(waterfall());
+    StartCoroutine(sizegrow());
   }
   private IEnumerator waterfall()
   {
@@ -23,6 +26,16 @@ public class WaterDrop : MonoBehaviour
     {
       _velocity += Vector2.up * Time.deltaTime * FallingSpeed;
       MyTransform.Translate(_velocity*Time.deltaTime);
+      yield return null;
+    }
+  }
+  private IEnumerator sizegrow()
+  {
+    float _time = 0.0f;
+    while(_time< SizeupTime)
+    {
+      MyTransform.localScale = Vector3.one * Mathf.Pow(_time / SizeupTime, 1.5f);
+      _time += Time.deltaTime;
       yield return null;
     }
   }

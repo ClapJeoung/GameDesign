@@ -27,6 +27,7 @@ public class Torch : MonoBehaviour
   [SerializeField] private ParticleSystem SmokeParticle = null; //사망 파티클
   private float firepower = 1.0f;//불 에너지
   private Interactable CurrentInteract = null;
+  [HideInInspector] public bool IsPlaying = true;
   public float FirePower
   {
     get { return firepower; }
@@ -34,7 +35,7 @@ public class Torch : MonoBehaviour
     {
       firepower = value;
       firepower = Mathf.Clamp(FirePower, 0.0f, 1.0f);
-      if (firepower <= 0.0f) { IdleParticle.Stop(); SmokeParticle.Play(); PlayerScript.Dead(); }
+      if (firepower <= 0.0f) { IdleParticle.Stop(); SmokeParticle.Play(); PlayerScript.Dead_soul(); }
       else if (value >= 1.0f && firepower < 1.0f) ChargedParticle.Play();
     }
   }
@@ -54,7 +55,7 @@ public class Torch : MonoBehaviour
   }
   private void OnTriggerEnter2D(Collider2D collision)
   {
-    if(FirePower <= 0.0f) return;
+    if(FirePower <= 0.0f||!IsPlaying) return;
 
     if (collision.CompareTag("Interactable")) {CurrentInteract= collision.GetComponent<Interactable>();CurrentInteract.FireUp(); }
     else if (collision.CompareTag("Recharge")) IsRecharging = true;
@@ -93,9 +94,11 @@ public class Torch : MonoBehaviour
   public void Dead()
   {
     if (CurrentInteract != null) { CurrentInteract.FireDown(); CurrentInteract = null; }
+    IsPlaying = false;
   }
   public void Ignite()
   {
+    IsPlaying = true;
     StartCoroutine(ignite());
   }
   private IEnumerator ignite()

@@ -7,7 +7,9 @@ public class GameManager : MonoBehaviour
   private static GameManager instance;
   public static GameManager Instance { get { return instance; } }
   //  [SerializeField] private Portal MyPortal = null;                //이제 안씀
-  [SerializeField] private RespawnObj MyRespawn = null;
+  [SerializeField] private TutorialManager MyTutorial = null;
+  [SerializeField] private RespawnObj OriginRespawn = null;
+   private RespawnObj CurrentRespawn = null;
   [SerializeField] private Transform PlayerTransform = null;
   private Player_Move MyPlayerMove = null;
   [SerializeField] private Torch MyTorch = null;
@@ -19,6 +21,14 @@ public class GameManager : MonoBehaviour
   [SerializeField] private FIreMask MyMask = null;
   //  [HideInInspector] public Dimension WorldDimension = Dimension.A;
   public StageCollider CurrentSC = null;
+  [Space(5)]
+  [SerializeField] private HindiData[] RestartHindies = null;
+  [SerializeField] private HindiData[] DeadHindies = null;
+  [Space(5)]
+  [SerializeField] private StageCollider[] AllStages = null;
+  public List<Lightobj> AllLights = new List<Lightobj>();
+  public void TurnOffLights() { foreach (var lights in AllLights) lights.TurnOff(); }   //모든 불 끄기(카메라 불 빼고)
+  [SerializeField] private Transform SkullHolder = null;
   public void SetSC(ref StageCollider newsc)
   {
     newsc.CurrentDimension=CurrentSC.CurrentDimension;
@@ -28,19 +38,48 @@ public class GameManager : MonoBehaviour
   {
     if (instance == null) instance = this;
     MyPlayerMove=PlayerTransform.GetComponent<Player_Move>();
+    CurrentRespawn = OriginRespawn;
   }
   [SerializeField] private MainCamera MyCamera = null;
   private void Update()
   {
     if (Input.GetKeyDown(KeyCode.Tab)) Spawn();
   }
+  private void Start()
+  {
+   Invoke("StartTutorial",0.1f);
+  }
   public void SetNewPlayer(Transform player)
   {
     MyPlayer = player;
     MyCamera.SetPlayer(player);
   }
-  public void SetNewRespawn(RespawnObj newrespawn) => MyRespawn = newrespawn;
-  public void Dead()  //플레이어 사망 즉시 호출
+  public void SetNewRespawn(RespawnObj newrespawn) => CurrentRespawn = newrespawn;
+  public void Flooded()
+  {
+    Time.timeScale = 1.0f;
+    MyCamera.StartFlood();
+    foreach (var stages in AllStages) stages.ResetStage();  //스테이지 전체 초기화
+    foreach (var lights in AllLights) lights.TurnOff();     //모든 불 끄기(카메라 불 빼고)
+  }
+  public void StartTutorial()       //홍수나고 페이드아웃 다음에 호출되는 튜토리얼 시작 함수
+  {
+    for(int i=0;i<SkullHolder.childCount;i++)Destroy(SkullHolder.GetChild(i).gameObject);
+    foreach (var lights in AllLights) lights.TurnOn();     //모든 불 키기
+    CurrentRespawn = OriginRespawn; //리스폰 오브젝트 초기화
+    MyTorch.Ignite();               //횃불 불 피우고
+    MyTorchPivot.SetTutorial(MyTutorial.TutorialTorchPos);  //횃불 튜토리얼 위치에 위치
+    MyCamera.FinishFlood();
+    UIManager.Instance.FadeIn(3.0f);  //3.0f초 정도로 페이드인
+    MyTutorial.Camera_start();      //카메라 튜토리얼화
+  }
+  public void FinishTutorial()      //튜토리얼 끝나고 호출
+  {
+    if (CurrentSC.CurrentDimension != CurrentSC.DefaultDimension) CloseMask(MyPlayer.position);
+    MyTorchPivot.FinishTutorial();
+    Respawn();
+  }
+  public void Dead_body()  //플레이어 사망 즉시 호출
   {
     if (CurrentSC.CurrentDimension != CurrentSC.DefaultDimension)
     {
@@ -48,8 +87,18 @@ public class GameManager : MonoBehaviour
       else OpenMask(MyPlayer.position);
     }
     MyTorchPivot.Dead();
-    MyTorch.Dead();
-    CurrentSC.ResetStage();
+    CurrentSC.ResetStage(); //현재 스테이지만 초기화
+  }
+  public void Dead_soul_0()   //횃불 사망 직후 호출
+  {
+    MyTorchPivot.Dead();  //횃불 멈추고
+    MyTorch.Dead();       //횃불 멈추고
+  }
+  public void Dead_soul_1() //플레이어 사망 연출 이후 호출
+  {
+    Time.timeScale = 0.0f;                              //주위 정지
+    int _random = Random.Range(0, DeadHindies.Length);
+    UIManager.Instance.OutputHindi(DeadHindies[_random].Sprites, DeadHindies[_random].Length);  //텍스트 출력 시작
   }
   public void Spawn()   //게임 최초 시작
   {
@@ -57,12 +106,11 @@ public class GameManager : MonoBehaviour
   }
   private IEnumerator spawn()
   {
-    bool isleft = PlayerTransform.position.x > MyRespawn.ObjPos().x;
-    float _cameramovetime = MyCamera.MoveToPosition(MyRespawn.ObjPos(),0.0f);;//카메라가 포탈까지 이동하는 시간
+    float _cameramovetime = MyCamera.MoveToPosition(CurrentRespawn.ObjPos(),0.0f);;//카메라가 포탈까지 이동하는 시간
 
-    MyTorchPivot.MoveToRespawn(MyRespawn.ObjPos(), _cameramovetime ); //토치도 카메라 따라 이동
+    MyTorchPivot.MoveToRespawn(CurrentRespawn.ObjPos(), _cameramovetime ); //토치도 카메라 따라 이동
   
-    MyPlayerMove.Respawn(MyRespawn.GetRespawnPos(isleft), MyRespawn.ObjPos().x, isleft);  //포탈이 열린 후 리스폰 시작
+    MyPlayerMove.Respawn(CurrentRespawn.GetRespawnPos(), CurrentRespawn.ObjPos().x);  //포탈이 열린 후 리스폰 시작
    
     yield return new WaitForSeconds(_cameramovetime);   //카메라 이동하는 동안 대기
                                                                                          
@@ -82,12 +130,11 @@ public class GameManager : MonoBehaviour
   }
   private IEnumerator respawn()
   {
-    bool isleft = PlayerTransform.position.x > MyRespawn.ObjPos().x;
-    float _cameramovetime = MyCamera.MoveToPosition(MyRespawn.ObjPos(), 0.0f); ;//카메라가 포탈까지 이동하는 시간
+    float _cameramovetime = MyCamera.MoveToPosition(CurrentRespawn.ObjPos(), 0.0f); ;//카메라가 포탈까지 이동하는 시간
 
-    MyTorchPivot.MoveToRespawn(MyRespawn.ObjPos(), _cameramovetime); //토치도 카메라 따라 이동
+    MyTorchPivot.MoveToRespawn(CurrentRespawn.ObjPos(), _cameramovetime); //토치도 카메라 따라 이동
 
-    MyPlayerMove.Respawn(MyRespawn.GetRespawnPos(isleft), MyRespawn.ObjPos().x, isleft);  //포탈이 열린 후 리스폰 시작
+    MyPlayerMove.Respawn(CurrentRespawn.GetRespawnPos(), CurrentRespawn.ObjPos().x);  //포탈이 열린 후 리스폰 시작
 
     yield return new WaitForSeconds(_cameramovetime);   //카메라 이동하는 동안 대기
 

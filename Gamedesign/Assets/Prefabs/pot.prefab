@@ -285,7 +285,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.15
+      scalar: 0.1
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -608,7 +608,7 @@ ParticleSystem:
     gravityModifier:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 2.23
+      scalar: 1.6
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -732,7 +732,7 @@ ParticleSystem:
     m_Mesh: {fileID: 0}
     m_MeshRenderer: {fileID: 0}
     m_SkinnedMeshRenderer: {fileID: 0}
-    m_Sprite: {fileID: 21300000, guid: 02991226ce5d483409f119e13ae5cb51, type: 3}
+    m_Sprite: {fileID: 21300000, guid: 212905becf91e0d4ca84e56af0aaec3c, type: 3}
     m_SpriteRenderer: {fileID: 0}
     m_UseMeshMaterialIndex: 0
     m_UseMeshColors: 1
@@ -4950,7 +4950,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 56635cd54b2401541a7eb88bbbaa93ca, type: 3}
+  m_Sprite: {fileID: 21300000, guid: aff9745a72f6e3644a37c1507b9d3a72, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -4979,7 +4979,7 @@ MonoBehaviour:
   - {fileID: 4456406611465909777}
   - {fileID: 4456406611070871475}
   - {fileID: 4456406611547956212}
-  FallPostion: {x: 0, y: -0.5}
+  FallPostion: {x: 0, y: 0.5, z: 0}
   OpenParticle: {fileID: 4456406611785736994}
   AllwaysActive: 1
   FirstWaitTime: 2
@@ -5061,7 +5061,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 02991226ce5d483409f119e13ae5cb51, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 212905becf91e0d4ca84e56af0aaec3c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -5088,6 +5088,7 @@ MonoBehaviour:
   MyTransform: {fileID: 4456406610928363619}
   MyRenderer: {fileID: 4456406610928363932}
   MyParticle: {fileID: 4456406611459705388}
+  SizeupTime: 0.4
 --- !u!60 &4456406610928363617
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -5113,14 +5114,15 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: -0.078125, y: 0.5}
-      - {x: -0.390625, y: 0.0625}
-      - {x: -0.390625, y: -0.34375}
-      - {x: -0.3125, y: -0.5}
-      - {x: 0.3125, y: -0.5}
-      - {x: 0.359375, y: -0.4375}
-      - {x: 0.359375, y: 0.0625}
-      - {x: 0.234375, y: 0.5}
+    - - {x: 0.01, y: 0.38}
+      - {x: -0.02, y: 0.41}
+      - {x: -0.049999997, y: 0.39999998}
+      - {x: -0.16, y: 0.16}
+      - {x: -0.16, y: -0.26}
+      - {x: -0.14, y: -0.32999998}
+      - {x: 0.07, y: -0.32999998}
+      - {x: 0.14999999, y: -0.26}
+      - {x: 0.14999999, y: -0.02}
 --- !u!50 &4456406610928363618
 Rigidbody2D:
   serializedVersion: 4
@@ -5219,7 +5221,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 02991226ce5d483409f119e13ae5cb51, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 212905becf91e0d4ca84e56af0aaec3c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -5246,6 +5248,7 @@ MonoBehaviour:
   MyTransform: {fileID: 4456406611070871473}
   MyRenderer: {fileID: 4456406611070871474}
   MyParticle: {fileID: 4456406611800188500}
+  SizeupTime: 0.4
 --- !u!60 &4456406611070871479
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -5271,14 +5274,15 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: -0.078125, y: 0.5}
-      - {x: -0.390625, y: 0.0625}
-      - {x: -0.390625, y: -0.34375}
-      - {x: -0.3125, y: -0.5}
-      - {x: 0.3125, y: -0.5}
-      - {x: 0.359375, y: -0.4375}
-      - {x: 0.359375, y: 0.0625}
-      - {x: 0.234375, y: 0.5}
+    - - {x: 0.01, y: 0.38}
+      - {x: -0.02, y: 0.41}
+      - {x: -0.049999997, y: 0.39999998}
+      - {x: -0.16, y: 0.16}
+      - {x: -0.16, y: -0.26}
+      - {x: -0.14, y: -0.32999998}
+      - {x: 0.07, y: -0.32999998}
+      - {x: 0.14999999, y: -0.26}
+      - {x: 0.14999999, y: -0.02}
 --- !u!50 &4456406611070871472
 Rigidbody2D:
   serializedVersion: 4
@@ -5585,7 +5589,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.15
+      scalar: 0.1
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -5908,7 +5912,7 @@ ParticleSystem:
     gravityModifier:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 2.23
+      scalar: 1.6
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -6032,7 +6036,7 @@ ParticleSystem:
     m_Mesh: {fileID: 0}
     m_MeshRenderer: {fileID: 0}
     m_SkinnedMeshRenderer: {fileID: 0}
-    m_Sprite: {fileID: 21300000, guid: 02991226ce5d483409f119e13ae5cb51, type: 3}
+    m_Sprite: {fileID: 21300000, guid: 212905becf91e0d4ca84e56af0aaec3c, type: 3}
     m_SpriteRenderer: {fileID: 0}
     m_UseMeshMaterialIndex: 0
     m_UseMeshColors: 1
@@ -10247,7 +10251,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 02991226ce5d483409f119e13ae5cb51, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 212905becf91e0d4ca84e56af0aaec3c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -10274,6 +10278,7 @@ MonoBehaviour:
   MyTransform: {fileID: 4456406611465909783}
   MyRenderer: {fileID: 4456406611465909776}
   MyParticle: {fileID: 4456406612540126031}
+  SizeupTime: 0.4
 --- !u!60 &4456406611465909781
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -10299,14 +10304,15 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: -0.078125, y: 0.5}
-      - {x: -0.390625, y: 0.0625}
-      - {x: -0.390625, y: -0.34375}
-      - {x: -0.3125, y: -0.5}
-      - {x: 0.3125, y: -0.5}
-      - {x: 0.359375, y: -0.4375}
-      - {x: 0.359375, y: 0.0625}
-      - {x: 0.234375, y: 0.5}
+    - - {x: 0.01, y: 0.38}
+      - {x: -0.02, y: 0.41}
+      - {x: -0.049999997, y: 0.39999998}
+      - {x: -0.16, y: 0.16}
+      - {x: -0.16, y: -0.26}
+      - {x: -0.14, y: -0.32999998}
+      - {x: 0.07, y: -0.32999998}
+      - {x: 0.14999999, y: -0.26}
+      - {x: 0.14999999, y: -0.02}
 --- !u!50 &4456406611465909782
 Rigidbody2D:
   serializedVersion: 4
@@ -10405,7 +10411,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 02991226ce5d483409f119e13ae5cb51, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 212905becf91e0d4ca84e56af0aaec3c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -10432,6 +10438,7 @@ MonoBehaviour:
   MyTransform: {fileID: 4456406611547956218}
   MyRenderer: {fileID: 4456406611547956219}
   MyParticle: {fileID: 4456406610677212458}
+  SizeupTime: 0.4
 --- !u!60 &4456406611547956216
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -10457,14 +10464,15 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: -0.078125, y: 0.5}
-      - {x: -0.390625, y: 0.0625}
-      - {x: -0.390625, y: -0.34375}
-      - {x: -0.3125, y: -0.5}
-      - {x: 0.3125, y: -0.5}
-      - {x: 0.359375, y: -0.4375}
-      - {x: 0.359375, y: 0.0625}
-      - {x: 0.234375, y: 0.5}
+    - - {x: 0.01, y: 0.38}
+      - {x: -0.02, y: 0.41}
+      - {x: -0.049999997, y: 0.39999998}
+      - {x: -0.16, y: 0.16}
+      - {x: -0.16, y: -0.26}
+      - {x: -0.14, y: -0.32999998}
+      - {x: 0.07, y: -0.32999998}
+      - {x: 0.14999999, y: -0.26}
+      - {x: 0.14999999, y: -0.02}
 --- !u!50 &4456406611547956217
 Rigidbody2D:
   serializedVersion: 4
@@ -10771,7 +10779,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.14
+      scalar: 0.1
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -10929,8 +10937,8 @@ ParticleSystem:
         m_RotationOrder: 4
     startRotationX:
       serializedVersion: 2
-      minMaxState: 0
-      scalar: 0
+      minMaxState: 3
+      scalar: 3.1415927
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -10982,8 +10990,8 @@ ParticleSystem:
         m_RotationOrder: 4
     startRotationY:
       serializedVersion: 2
-      minMaxState: 0
-      scalar: 0
+      minMaxState: 3
+      scalar: 3.1415927
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -11035,8 +11043,8 @@ ParticleSystem:
         m_RotationOrder: 4
     startRotation:
       serializedVersion: 2
-      minMaxState: 0
-      scalar: 0
+      minMaxState: 3
+      scalar: 3.1415927
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -11153,7 +11161,7 @@ ParticleSystem:
     boxThickness: {x: 0, y: 0, z: 0}
     radiusThickness: 1
     donutRadius: 0.2
-    m_Position: {x: 0, y: -0.13, z: 0}
+    m_Position: {x: 0, y: 0.48, z: 0}
     m_Rotation: {x: 0, y: 0, z: 0}
     m_Scale: {x: 1, y: 1, z: 1}
     placementMode: 0
@@ -11234,7 +11242,7 @@ ParticleSystem:
     sphericalDirectionAmount: 0.25
     randomPositionAmount: 0
     radius:
-      value: 0.34
+      value: 0.16
       mode: 0
       spread: 0
       speed:
@@ -11480,8 +11488,8 @@ ParticleSystem:
         - serializedVersion: 3
           time: 1
           value: 0
-          inSlope: -2
-          outSlope: -2
+          inSlope: 0
+          outSlope: 0
           tangentMode: 0
           weightedMode: 0
           inWeight: 0
@@ -15583,7 +15591,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.15
+      scalar: 0.1
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -15906,7 +15914,7 @@ ParticleSystem:
     gravityModifier:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 2.23
+      scalar: 1.6
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -16030,7 +16038,7 @@ ParticleSystem:
     m_Mesh: {fileID: 0}
     m_MeshRenderer: {fileID: 0}
     m_SkinnedMeshRenderer: {fileID: 0}
-    m_Sprite: {fileID: 21300000, guid: 02991226ce5d483409f119e13ae5cb51, type: 3}
+    m_Sprite: {fileID: 21300000, guid: 212905becf91e0d4ca84e56af0aaec3c, type: 3}
     m_SpriteRenderer: {fileID: 0}
     m_UseMeshMaterialIndex: 0
     m_UseMeshColors: 1
@@ -20245,7 +20253,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 02991226ce5d483409f119e13ae5cb51, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 212905becf91e0d4ca84e56af0aaec3c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -20272,6 +20280,7 @@ MonoBehaviour:
   MyTransform: {fileID: 4456406612114005366}
   MyRenderer: {fileID: 4456406612114005367}
   MyParticle: {fileID: 4456406612522188486}
+  SizeupTime: 0.4
 --- !u!60 &4456406612114005364
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -20297,14 +20306,15 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: -0.078125, y: 0.5}
-      - {x: -0.390625, y: 0.0625}
-      - {x: -0.390625, y: -0.34375}
-      - {x: -0.3125, y: -0.5}
-      - {x: 0.3125, y: -0.5}
-      - {x: 0.359375, y: -0.4375}
-      - {x: 0.359375, y: 0.0625}
-      - {x: 0.234375, y: 0.5}
+    - - {x: 0.01, y: 0.38}
+      - {x: -0.02, y: 0.41}
+      - {x: -0.049999997, y: 0.39999998}
+      - {x: -0.16, y: 0.16}
+      - {x: -0.16, y: -0.26}
+      - {x: -0.14, y: -0.32999998}
+      - {x: 0.07, y: -0.32999998}
+      - {x: 0.14999999, y: -0.26}
+      - {x: 0.14999999, y: -0.02}
 --- !u!50 &4456406612114005365
 Rigidbody2D:
   serializedVersion: 4
@@ -20611,7 +20621,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.15
+      scalar: 0.1
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -20934,7 +20944,7 @@ ParticleSystem:
     gravityModifier:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 2.23
+      scalar: 1.6
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -21058,7 +21068,7 @@ ParticleSystem:
     m_Mesh: {fileID: 0}
     m_MeshRenderer: {fileID: 0}
     m_SkinnedMeshRenderer: {fileID: 0}
-    m_Sprite: {fileID: 21300000, guid: 02991226ce5d483409f119e13ae5cb51, type: 3}
+    m_Sprite: {fileID: 21300000, guid: 212905becf91e0d4ca84e56af0aaec3c, type: 3}
     m_SpriteRenderer: {fileID: 0}
     m_UseMeshMaterialIndex: 0
     m_UseMeshColors: 1
@@ -25481,7 +25491,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.15
+      scalar: 0.1
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -25804,7 +25814,7 @@ ParticleSystem:
     gravityModifier:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 2.23
+      scalar: 1.6
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -25928,7 +25938,7 @@ ParticleSystem:
     m_Mesh: {fileID: 0}
     m_MeshRenderer: {fileID: 0}
     m_SkinnedMeshRenderer: {fileID: 0}
-    m_Sprite: {fileID: 21300000, guid: 02991226ce5d483409f119e13ae5cb51, type: 3}
+    m_Sprite: {fileID: 21300000, guid: 212905becf91e0d4ca84e56af0aaec3c, type: 3}
     m_SpriteRenderer: {fileID: 0}
     m_UseMeshMaterialIndex: 0
     m_UseMeshColors: 1

@@ -9,6 +9,12 @@ public abstract class RespawnObj : MonoBehaviour
   public float Movetime = 0.0f;
   public bool IsActive = false;
 
-  public Vector3 GetRespawnPos(bool isleft) { return transform.position+(Vector3)RespawnPos*(isleft?-1:1) + Vector3.back * 2.0f+Vector3.up*0.5f; }
+  public Vector3 GetRespawnPos() { return transform.position+(Vector3)RespawnPos + Vector3.back * 2.0f+Vector3.up*0.5f; }
   public Vector2 ObjPos() { return transform.position; }
+
+  private void OnDrawGizmos()
+  {
+    Gizmos.color = Color.magenta;
+    Gizmos.DrawLine(transform.position, transform.position+ (Vector3)RespawnPos);
+  }
 }

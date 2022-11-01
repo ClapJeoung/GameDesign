@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
-public class Wooden : MonoBehaviour,Interactable
+public class Wooden : MonoBehaviour,Interactable,Lightobj
 {
   [SerializeField] private float RequireTime = 2.0f; //다 타는데 필요한 시간
  [Range(0.0f,1.0f)] [SerializeField] private float IgniteTime = 0.5f; //발화가 진행되는 순간 (0~1)
@@ -16,8 +16,8 @@ public class Wooden : MonoBehaviour,Interactable
   [SerializeField] private ParticleSystem SmokeParticle = null;//검은 연기 파티클
   [SerializeField] private ParticleSystem BurningParticle = null;//불타는 파티클
   [SerializeField] private ParticleSystem FiredParticle = null; //다 탔을떄 파티클
-  private Vector2 CurrentTorchPos = Vector2.zero;       //실시간으로 콜라이더에 들어가있는 횃불 위치
-  private Vector2 TargetTorchPos = Vector2.zero;        //불 시작할 위치
+  private Vector3 CurrentTorchPos = Vector2.zero;       //실시간으로 콜라이더에 들어가있는 횃불 위치
+  private Vector3 TargetTorchPos = Vector2.zero;        //불 시작할 위치
   [SerializeField] private float SmokeTime = 0.2f;      //연기 올라오는 시간
   [SerializeField] private Transform MaskTransform = null;//마스크 트랜스폼
   [SerializeField] private float FireSize = 2.0f;
@@ -56,7 +56,7 @@ public class Wooden : MonoBehaviour,Interactable
     yield return new WaitForSeconds(SmokeTime);
     if (IsFired)
     {
-      SmokeParticle.transform.position = CurrentTorchPos;
+      SmokeParticle.transform.position = CurrentTorchPos+Vector3.back;
       SmokeParticle.Play();
     }
   }
@@ -90,7 +90,7 @@ public class Wooden : MonoBehaviour,Interactable
      //   FireTransform.localScale = Vector3.zero;  //불 크기 초기값(0) 설정
      //   MaskTransform.position = TargetTorchPos;
         SmokeParticle.Stop();                     //검은연기 파티클 종료
-        BurningParticle.transform.position = TargetTorchPos; //불타는 파티클 위치 설정
+        BurningParticle.transform.position = TargetTorchPos + Vector3.back; //불타는 파티클 위치 설정
         BurningParticle.Play();                   //불타는 파티클 실행
         MyLight.transform.position = TargetTorchPos;
       }
@@ -101,7 +101,7 @@ public class Wooden : MonoBehaviour,Interactable
     if ((Progress / RequireTime) >= IgniteTime)//불이 붙는 수준
     {
       Progress += Time.deltaTime; //불이 있든 없든 계속 불탐
-
+      if(SmokeParticle.isPlaying) SmokeParticle.Stop();
     //  FireTransform.localScale = Vector3.one * Mathf.Lerp(0, FireSize, ((Progress / RequireTime) - IgniteTime)/(1-IgniteTime));
       MyLight.pointLightOuterRadius=MaxLightOuter* ((Progress / RequireTime) - IgniteTime) / (1 - IgniteTime);
       //Ignitetime ~ 1을 0 ~ 1로 변환시키고 크기에 대입
@@ -149,11 +149,35 @@ public class Wooden : MonoBehaviour,Interactable
     if (MyDimension == Dimension.A) Spr_B.enabled = false;
     else if(MyDimension== Dimension.B) Spr_A.enabled = false;
     OriginDimension = MyDimension;
+    GameManager.Instance.AllLights.Add(this);
   }
   private void Start()
   {
     Setup();
   }
+  public void TurnOn()
+  {
+    MyLight.enabled = true;
+  }
+  public void TurnOff()
+  {
+    MyLight.enabled = false;
+    //  StartCoroutine(turnoff());
+  }
+  private IEnumerator turnoff()
+  {
+    float _time = 0.0f;
+    float _origin = MyLight.intensity;
+    if (_origin != 0.0f)
+      while (_time < 1.0f)
+      {
+        MyLight.intensity = _origin * (_time / 1.0f);
+        _time += Time.deltaTime;
+        yield return null;
+      }
+    MyLight.enabled = false;
+  }
+
   public void ResetDimension()
   {
    if( MyDimension != OriginDimension)
