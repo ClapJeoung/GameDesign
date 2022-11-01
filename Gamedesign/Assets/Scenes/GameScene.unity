@@ -31430,7 +31430,7 @@ Tilemap:
       - {fileID: 499111162, guid: ccb768cb64d56bc429420f97798b19d5, type: 3}
       - {fileID: 274567045, guid: ccb768cb64d56bc429420f97798b19d5, type: 3}
       - {fileID: -1196197950, guid: ccb768cb64d56bc429420f97798b19d5, type: 3}
-      m_AnimationSpeed: 7.5000005
+      m_AnimationSpeed: 7.5
       m_AnimationTimeOffset: 0
       m_IsLooping: 1
   - first: {x: 67, y: 12, z: 0}
@@ -31439,7 +31439,7 @@ Tilemap:
       - {fileID: 499111162, guid: ccb768cb64d56bc429420f97798b19d5, type: 3}
       - {fileID: 274567045, guid: ccb768cb64d56bc429420f97798b19d5, type: 3}
       - {fileID: -1196197950, guid: ccb768cb64d56bc429420f97798b19d5, type: 3}
-      m_AnimationSpeed: 7.5
+      m_AnimationSpeed: 7.5000005
       m_AnimationTimeOffset: 0
       m_IsLooping: 1
   - first: {x: 68, y: 12, z: 0}
@@ -68976,6 +68976,8 @@ MonoBehaviour:
   AllStages:
   - {fileID: 176833639}
   SkullHolder: {fileID: 311527832}
+  TimeSlowTime: 2
+  TimeRecoveryTime: 0.5
   MyCamera: {fileID: 519420034}
 --- !u!4 &1933923211
 Transform:

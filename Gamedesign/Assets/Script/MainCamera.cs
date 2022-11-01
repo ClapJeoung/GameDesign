@@ -97,15 +97,17 @@ public class MainCamera : MonoBehaviour
     IsDead = true;
     StartCoroutine(flood_move());
     StartCoroutine(flood_angle());
-    StartCoroutine(flood_shake());
     UIManager.Instance.FadeOut(Flood_FadeOutTime);
+  }
+  public void StartFloodParticle()
+  {
+    StartCoroutine(flood_shake());
     ParticleSystem.ShapeModule _shape = Flood_dustparticle.shape;
     _shape.position = MyTransform.position + new Vector3(0.0f, 5.5f, 3.0f);
     Flood_dustparticle.Play();
-    _shape=Flood_stoneparticle.shape;
+    _shape = Flood_stoneparticle.shape;
     _shape.position = MyTransform.position + new Vector3(0.0f, 5.5f, 3.0f);
     Flood_stoneparticle.Play();
-    
   }
   private IEnumerator flood_move()  //홍수 오브젝트 이동
   {
@@ -137,11 +139,17 @@ public class MainCamera : MonoBehaviour
   {
     Vector3 _originpos = MyTransform.position;
     Vector3 _offset = Vector2.zero;
+    float _time = 0.0f;
     while (true)
     {
       _offset = new Vector2(Random.Range(-Flood_shakedeg, Flood_shakedeg),Random.Range(-Flood_shakedeg, Flood_shakedeg));
       MyTransform.position = _originpos + _offset;
-      yield return new WaitForSeconds(1.0f / Flood_shakecount);
+      _time = 0.0f;
+      while (_time < 1.0f / Flood_shakecount)
+      {
+        _time += Time.unscaledDeltaTime;
+        yield return null;
+      }
     }
   }
   public void FinishFlood()

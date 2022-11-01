@@ -29,6 +29,8 @@ public class GameManager : MonoBehaviour
   public List<Lightobj> AllLights = new List<Lightobj>();
   public void TurnOffLights() { foreach (var lights in AllLights) lights.TurnOff(); }   //모든 불 끄기(카메라 불 빼고)
   [SerializeField] private Transform SkullHolder = null;
+  [SerializeField] private float TimeSlowTime = 4.5f;
+  [SerializeField] private float TimeRecoveryTime = 1.5f;
   public void SetSC(ref StageCollider newsc)
   {
     newsc.CurrentDimension=CurrentSC.CurrentDimension;
@@ -43,7 +45,7 @@ public class GameManager : MonoBehaviour
   [SerializeField] private MainCamera MyCamera = null;
   private void Update()
   {
-    if (Input.GetKeyDown(KeyCode.Tab)) Spawn();
+//    if (Input.GetKeyDown(KeyCode.Tab)) Spawn();
   }
   private void Start()
   {
@@ -57,10 +59,21 @@ public class GameManager : MonoBehaviour
   public void SetNewRespawn(RespawnObj newrespawn) => CurrentRespawn = newrespawn;
   public void Flooded()
   {
-    Time.timeScale = 1.0f;
+    StartCoroutine(recoverytime());
     MyCamera.StartFlood();
     foreach (var stages in AllStages) stages.ResetStage();  //스테이지 전체 초기화
     foreach (var lights in AllLights) lights.TurnOff();     //모든 불 끄기(카메라 불 빼고)
+  }
+  private IEnumerator recoverytime()
+  {
+      float _time = 0.0f;
+      while (_time < TimeRecoveryTime)
+      {
+        _time += Time.unscaledDeltaTime;
+        Time.timeScale =  _time / TimeRecoveryTime;
+        yield return null;
+      }
+      Time.timeScale = 1.0f;
   }
   public void StartTutorial()       //홍수나고 페이드아웃 다음에 호출되는 튜토리얼 시작 함수
   {
@@ -96,9 +109,22 @@ public class GameManager : MonoBehaviour
   }
   public void Dead_soul_1() //플레이어 사망 연출 이후 호출
   {
-    Time.timeScale = 0.0f;                              //주위 정지
+    MyCamera.StartFloodParticle();
+    StartCoroutine(slowtime());                              //주위 정지
     int _random = Random.Range(0, DeadHindies.Length);
     UIManager.Instance.OutputHindi(DeadHindies[_random].Sprites, DeadHindies[_random].Length);  //텍스트 출력 시작
+  }
+  private IEnumerator slowtime()
+  {
+    float _time = 0.0f;
+    while(_time< TimeSlowTime)
+    {
+      _time += Time.unscaledDeltaTime;
+      if (1 - _time / TimeSlowTime < 0) break;
+      Time.timeScale = 1 - _time / TimeSlowTime;
+      yield return null;
+    }
+    Time.timeScale = 0.0f;
   }
   public void Spawn()   //게임 최초 시작
   {
