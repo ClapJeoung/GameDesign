@@ -11,7 +11,7 @@ public class Pot : EventTarget
   [SerializeField] private float FirstWaitTime = 0.0f;          //영구적으로 활성화됐을때 초기 대기시간
   private float PouringTime = 2.0f;                             //물 붓는 시간
   [SerializeField] private float WaitTime = 4.0f;               //물 붓고 다음 붓기까지 대기하는 시간
-
+  public int MyId = 0;
   private IEnumerator pouring()
   {
     yield return new WaitForSeconds(FirstWaitTime);

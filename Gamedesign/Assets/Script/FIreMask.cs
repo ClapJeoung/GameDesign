@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class FIreMask : MonoBehaviour
 {
@@ -11,26 +12,48 @@ public class FIreMask : MonoBehaviour
   [SerializeField] private ParticleSystem Particle_world = null;
   [SerializeField] private ParticleSystem Particle_soul = null;
   [SerializeField] private Animator ChangeEffectAnimator = null;
-
+  private SpriteMask MyMask = null;
+  [SerializeField] private Light2D PlayerLight = null;
+  [SerializeField] private Transform FireTrans = null;
   private void Start()
   {
     Setup();
+    MyMask = GetComponent<SpriteMask>();
   }
   public void Setup()
   {
     MyTransform= transform;
   }
-  public void Open(Vector2 newpos)
+  public void Open(float newsize)
   {
-    ChangeEffectAnimator.SetTrigger("ToSoul");
-   // MyTransform.position = newpos;
-    StartCoroutine(changepos(OpenPos,false));
+    StartCoroutine(open(newsize));
   }
-  public void Close(Vector2 newpos)
+  private IEnumerator open(float _size)
   {
+    // Debug.Log(_size);
+    AudioManager.Instance.PlayClip(0);
+    float _originsize = FireTrans.localScale.x;
+    FireTrans.localScale = Vector3.one*_size;
+    ChangeEffectAnimator.SetTrigger("ToSoul");
+    yield return new WaitForSeconds(0.5f);
+    MyMask.enabled = true;
+    yield return new WaitForSeconds(0.5f);
+    FireTrans.localScale = Vector3.one * _originsize;
+  }
+  public void Close(float _size)
+  {
+    StartCoroutine(close(_size));
+  }
+  private IEnumerator close(float _size)
+  {
+    AudioManager.Instance.PlayClip(0);
+    float _originsize = FireTrans.localScale.x;
+    FireTrans.localScale = Vector3.one * _size;
     ChangeEffectAnimator.SetTrigger("ToWorld");
-  //  MyTransform.position = newpos;
-    StartCoroutine(changepos(ClosePos,true));
+    yield return new WaitForSeconds(0.5f);
+    MyMask.enabled = false;
+    yield return new WaitForSeconds(0.5f);
+    FireTrans.localScale = Vector3.one * _originsize;
   }
   private IEnumerator changepos(float targetpos,bool istoworld)
   {

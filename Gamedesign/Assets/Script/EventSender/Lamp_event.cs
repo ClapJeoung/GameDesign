@@ -97,8 +97,8 @@ public class Lamp_event : MonoBehaviour, Interactable,Lightobj
       if (MyLampType == LampType.Dimension)
       {
         if (GameManager.Instance.CurrentSC.CurrentDimension == Dimension.A)
-        { GameManager.Instance.OpenMask(MyTransform.position); MySpr.sprite = Spr_soul; }
-        else { GameManager.Instance.CloseMask(MyTransform.position);MySpr.sprite = Spr_world; }
+        { GameManager.Instance.OpenMask(1.0f); MySpr.sprite = Spr_soul; }
+        else { GameManager.Instance.CloseMask(1.0f);MySpr.sprite = Spr_world; }
         Progress = 0.0f;
         Ignited = false;
       }
@@ -136,7 +136,7 @@ public class Lamp_event : MonoBehaviour, Interactable,Lightobj
   {
     Ignitable = true;
     Progress = 0.0f;
-    foreach (var target in MyActiveTargets) target.Deactive();
-    foreach (var target in MyDeactiveTargets) target.Active();
+    foreach (var target in MyActiveTargets)if(target!=null) target.Deactive();
+    foreach (var target in MyDeactiveTargets) if (target != null) target.Active();
   }
 }

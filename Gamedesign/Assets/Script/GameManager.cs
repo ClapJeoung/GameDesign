@@ -88,7 +88,7 @@ public class GameManager : MonoBehaviour
   }
   public void FinishTutorial()      //튜토리얼 끝나고 호출
   {
-    if (CurrentSC.CurrentDimension != CurrentSC.DefaultDimension) CloseMask(MyPlayer.position);
+    if (CurrentSC.CurrentDimension != CurrentSC.DefaultDimension) CloseMask(1.0f);
     MyTorchPivot.FinishTutorial();
     Respawn();
   }
@@ -96,8 +96,8 @@ public class GameManager : MonoBehaviour
   {
     if (CurrentSC.CurrentDimension != CurrentSC.DefaultDimension)
     {
-      if (CurrentSC.DefaultDimension == Dimension.A) CloseMask(MyPlayer.position);
-      else OpenMask(MyPlayer.position);
+      if (CurrentSC.DefaultDimension == Dimension.A) CloseMask(1.0f);
+      else OpenMask(1.0f);
     }
     MyTorchPivot.Dead();
     CurrentSC.ResetStage(); //현재 스테이지만 초기화
@@ -165,23 +165,6 @@ public class GameManager : MonoBehaviour
     yield return new WaitForSeconds(_cameramovetime);   //카메라 이동하는 동안 대기
 
     MyTorch.Ignite();
-
-    /*
-      float _cameramovetime = MyCamera.MoveToPosition(NewestLamp.transform.position,MyPortal.OpenningTime+MyPortal.RespawnTime);//카메라가 포탈까지 이동하는 시간
-
-      MyTorchPivot.MoveToRespawn(NewestLamp.transform.position + Vector3.up * 1.0f, _cameramovetime+MyPortal.OpenningTime+MyPortal.RespawnTime); //토치도 카메라 따라 이동
-      yield return new WaitForSeconds(_cameramovetime);   //카메라 이동하는 동안 대기
-
-      MyPortal.Open(NewestLamp.transform.position + Vector3.up * 1.0f);
-
-      yield return new WaitForSeconds(MyPortal.OpenningTime);  //포탈이 다 열릴때까지 대기
-
-      MyPlayerMove.Respawn(NewestLamp.transform.position + Vector3.up * 1.0f, MyPortal.RespawnTime);  //포탈이 열린 후 리스폰 시작
-
-      yield return new WaitForSeconds(MyPortal.RespawnTime);    //플레이어가 재생성되는 동안 대기
-
-      MyTorch.Ignite();
-      MyPortal.Close();   */
   }
   public void GetWaterParticle(out Transform waterdowntrans,out ParticleSystem waterdownpar,out Transform wateruptrans,out ParticleSystem wateruppar)
   {
@@ -191,7 +174,7 @@ public class GameManager : MonoBehaviour
     wateruppar = WaterUp.GetComponent<ParticleSystem>();
   }
 
-  public void OpenMask(Vector2 newpos) { MyMask.Open(newpos); CurrentSC.CurrentDimension = Dimension.B; }
-  public void CloseMask(Vector2 newpos) { MyMask.Close(newpos); CurrentSC.CurrentDimension = Dimension.A; }
+  public void OpenMask(float _size) { MyMask.Open(_size); CurrentSC.CurrentDimension = Dimension.B; }
+  public void CloseMask(float _size) { MyMask.Close(_size); CurrentSC.CurrentDimension = Dimension.A; }
   public void PlayRPParticle() => MyCamera.StartRPParticle();
 }

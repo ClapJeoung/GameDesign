@@ -9,6 +9,14 @@ public class WaterDrop : MonoBehaviour
   [SerializeField] private SpriteRenderer MyRenderer = null;
   [SerializeField] private ParticleSystem MyParticle = null;
   [SerializeField] private float SizeupTime = 0.5f;
+  private StageCollider MySC = null;
+  private int MyID = 0;
+
+  private void Start()
+  {
+    MySC=transform.parent.parent.GetComponent<StageCollider>();
+    MyID = transform.parent.GetComponent<Pot>().MyId;
+  }
 
   public void Fall(Vector3 newpos)
   {
@@ -47,6 +55,8 @@ public class WaterDrop : MonoBehaviour
       MyRenderer.enabled = false;
       MyTransform.tag = "Untagged";
       MyParticle.Play();
+      if(GameManager.Instance.CurrentSC==MySC) AudioManager.Instance.PlayClip(4, MyID);
+
     }
   }
 }

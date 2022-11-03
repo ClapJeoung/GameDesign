@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
+using UnityEngine.SceneManagement;
 
 public class MainCamera : MonoBehaviour
 {
@@ -34,6 +36,8 @@ public class MainCamera : MonoBehaviour
   [SerializeField] private ParticleSystem Flood_dustparticle = null;  //먼지 파티클
   [SerializeField] private ParticleSystem Flood_stoneparticle = null; //낙석 파티클
   private bool IsFlooded = false;                                     //침수 완료됐나요
+  [SerializeField] private Light2D MyLight = null;
+  private float OriginIntensity = 0.0f;
   private void Setup()
   {
     MyTransform = transform;
@@ -50,7 +54,7 @@ public class MainCamera : MonoBehaviour
   private void Update()
   {
     //  particle_world_shape.position = new Vector3(MyTransform.position.x, MyTransform.position.y + 5.5f, -1.0f);
-    if (Input.anyKeyDown && IsFlooded) GameManager.Instance.StartTutorial();
+    if (Input.anyKeyDown && IsFlooded) SceneManager.LoadScene(0);
     particle_soul_shape.position = new Vector3(MyTransform.position.x, MyTransform.position.y, 8.0f);
     if (IsDead) return;
     NewPos = Vector3.Lerp(MyTransform.position, PlayerTransform.position, Time.deltaTime * CameraSpeed);
@@ -66,7 +70,7 @@ public class MainCamera : MonoBehaviour
     StartCoroutine(moveto(newpos,waittime));
     return RespawnMovetime + 0.1f;
   }
-  public void StartRPParticle() => RP_start.Play();
+  public void StartRPParticle() { RP_start.Play(); AudioManager.Instance.PlayClip(1); }
   private IEnumerator moveto(Vector3 newpos,float waittime)
   {
     IsDead = true;
@@ -160,15 +164,31 @@ public class MainCamera : MonoBehaviour
     FloodTrans.eulerAngles = Vector3.zero;
     MyTransform.eulerAngles = Vector3.zero;
   }
-  public void Tutorial_start(Vector2 startpos,float size)
+  public void Tutorial_start(Vector2 startpos,float size) //튜토리얼 시작하면
   {
-    IsDead = true;
-    MyTransform.position = (Vector3)startpos + Vector3.back * 10.0f;
-    MyCamera.orthographicSize = size;
+    IsDead = true;  //카메라 자동이동 끄고
+    MyTransform.position = (Vector3)startpos + Vector3.back * 10.0f;  //튜토리얼 위치로 이동하고
+    MyCamera.orthographicSize = size;     //카메라 사이즈 확대하고
+    OriginIntensity = MyLight.intensity;  
+    StartCoroutine(settinglight(0.0f));   //기본 배경 조명 끄고
   }
-  public void Tutorial_finish(float targetsize,float targettime)
+  public void Tutorial_finish(float targetsize,float targettime)  //튜토리얼 끝나면
   {
-    StartCoroutine(tutorial_finish(targetsize,targettime));
+    StartCoroutine(tutorial_finish(targetsize,targettime));       //카메라 사이즈 다시 늘려주고
+    StartCoroutine(settinglight(OriginIntensity));                //원래 있던 빛도 복구
+  }
+  private IEnumerator settinglight(float targetint) //불조정
+  {
+    float _targettime = 0.5f;
+    float _time = 0.0f;
+    float _originint=MyLight.intensity;
+    while (_time < _targettime)
+    {
+      MyLight.intensity = Mathf.Lerp(_originint, targetint, _time / _targettime);
+      _time += Time.deltaTime;
+      yield return null;
+    }
+    MyLight.intensity = targetint;
   }
   private IEnumerator tutorial_finish(float targetsize,float targettime)
   {

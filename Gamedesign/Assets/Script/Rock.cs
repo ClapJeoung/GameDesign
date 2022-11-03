@@ -34,12 +34,13 @@ public class Rock : MonoBehaviour
     {
       BottomVertex[i] = new Vector2(- _width/2 + _widthunit * i, -_height / 2);
     }
+    CircleCollider2D _asdf= GetComponent<CircleCollider2D>();
   }
   private void Start()
   {
    Invoke("Setup",0.01f);
   }
-  private void VerticalRaycast()
+  public virtual void VerticalRaycast()
   {
     RaycastHit2D[] _hit;
     RaycastHit2D _targethit=new RaycastHit2D();
@@ -78,12 +79,15 @@ public class Rock : MonoBehaviour
           _targethit.transform.GetComponent<Breakable>().Pressed(); //밟아서 부숴지는 이벤트 실행
         else if (_targethit.transform.CompareTag("Conveyor_R")) Conveyor = 1;
         else if (_targethit.transform.CompareTag("Conveyor_L")) Conveyor = -1;
+        else Conveyor = 0;
 
         IsLanding = true;     //이 오브젝트는 땅에 붙어있다
-
         break;
       }
-      else IsLanding = false; //이 오브젝트는 땅에 붙어있지 않다
+      else
+      {
+        Conveyor = 0; IsLanding = false;
+      }//이 오브젝트는 땅에 붙어있지 않다
     }
   }
   private void Update()
@@ -97,9 +101,10 @@ public class Rock : MonoBehaviour
     if (Velocity.y <= 0.05f && Velocity.y >= -0.05f) Velocity.y = 0;
     MyTransform.Translate((Velocity + Vector2.right * ConveyorSpeed * Conveyor) * Time.deltaTime);
   }
-  public void Resetpos() => StartCoroutine(resetpos());
+  public virtual void Resetpos() => StartCoroutine(resetpos());
   private IEnumerator resetpos()
   {
+    Conveyor = 0;
     IsPlaying = false;
     float _time = 0.0f;
     Vector3 _currentpos = MyTransform.position;

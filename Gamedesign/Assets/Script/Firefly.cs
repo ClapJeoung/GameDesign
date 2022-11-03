@@ -19,13 +19,17 @@ public class Firefly : RespawnObj,Lightobj
 
   public void Setup()
   {
+    ParticleSystem.MainModule _main = MyParticle.main;
     if (IsActive)
     {
       MyLight.pointLightOuterRadius = TargetSize;
-      ParticleSystem.MainModule _main = MyParticle.main;
       _main.startColor =  ActiveColor;
       StartCoroutine(keepmove());
       StartCoroutine(keeplight());
+    }
+    else
+    {
+      MyLight.pointLightOuterRadius = 0.0f;
     }
     GameManager.Instance.AllLights.Add(this);
   }

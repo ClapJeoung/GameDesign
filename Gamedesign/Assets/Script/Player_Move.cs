@@ -31,6 +31,7 @@ public class Player_Move : MonoBehaviour
   [SerializeField] private int VertexCount = 5;       //충돌 검사할 점 개수
   private Vector2[] Vertex_top, Vertex_bottom,Vertex_right,Vertex_left;//충돌 검사할 점 위치
   private Transform MyTransform;                      //내 트랜스폼
+  private Transform MySprTransform = null;
   private bool Jumpable = true;                       //지금 점프 가능한지
   private float jumptime = 0.0f;
   private float JumpTime { get { return jumptime; } set { jumptime = value; if (jumptime >= MaxJumpTime) Jumpable = false; } }
@@ -70,6 +71,7 @@ public class Player_Move : MonoBehaviour
   public void Setup()
   {
     MyTransform = transform;
+    MySprTransform = MyTransform.GetChild(0).transform;
     BoxCollider2D Col = GetComponent<BoxCollider2D>();
 
     Bounds MyBound = Col.bounds;
@@ -269,6 +271,10 @@ public class Player_Move : MonoBehaviour
       }//그 돌이 떨어지는 상태라면 육체 죽음
     }
   }
+  public void RollingStones()
+  {
+    Dead_body(Vector2.up * -GetComponent<BoxCollider2D>().bounds.size.y / 2, true);
+  }
   private void OnTriggerExit2D(Collider2D collision)
   {
     if (collision.gameObject.layer ==LayerMask.NameToLayer("Water"))
@@ -292,6 +298,7 @@ public class Player_Move : MonoBehaviour
   }
   private IEnumerator dead_body(Vector2 bloodpos,bool isrock)
   {
+    AudioManager.Instance.PlayClip(2);
     IsPlaying = false;
     MyTorch.Dead();
 
@@ -300,8 +307,10 @@ public class Player_Move : MonoBehaviour
     DeadShape_body.position = MyTransform.position + (Vector3)bloodpos + Vector3.back;
     DeadShape_body.rotation = _bloodrot;
     DeadParticle_body.Play();           //지벳
+    if (isrock) MySprTransform.localScale = new Vector3(1.0f, 0.2f, 1.0f);
 
     if (bloodpos.y<=0) yield return new WaitForSeconds(0.15f); //조작만 중지시키고 대충 바닥에 닿을 때까지 대기
+    if (isrock) yield return new WaitForSeconds(0.75f); //돌에 깔린거면 바닥에 닿을때까지 대기
 
     IsDead = true;
     IsWater = false;
@@ -340,6 +349,7 @@ public class Player_Move : MonoBehaviour
   private IEnumerator dead_soul ()
   {
     GameManager.Instance.Dead_soul_0(); //횃불 대신 멈춰주는 함수
+    AudioManager.Instance.PlayClip(3);
     IsDead = true;
     IsPlaying = false;
     IsWater = false;
@@ -367,6 +377,7 @@ public class Player_Move : MonoBehaviour
   {
     MyTransform.position = (Vector3)newpos + Vector3.back * 2;          //위치로 이동하고
     MyTransform.localScale = Vector3.one;
+    MySprTransform.localScale = Vector3.one;
   //  Debug.Log($"isleft : {isleft}  newpos.x : {newpos.x}  targetpos.x : {targetx}");
     StartCoroutine(respawn(targetx));  //코루틴 시작
   }
