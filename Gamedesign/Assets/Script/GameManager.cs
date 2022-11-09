@@ -17,7 +17,7 @@ public class GameManager : MonoBehaviour
   [Space(5)]
   [SerializeField] private GameObject WaterDown = null;
   [SerializeField] private GameObject WaterUp = null;
-  private Transform MyPlayer = null;
+  [SerializeField] private Transform MyPlayer = null;
   [SerializeField] private FIreMask MyMask = null;
   //  [HideInInspector] public Dimension WorldDimension = Dimension.A;
   public StageCollider CurrentSC = null;
@@ -51,20 +51,15 @@ public class GameManager : MonoBehaviour
   {
    Invoke("StartTutorial",0.1f);
   }
-  public void SetNewPlayer(Transform player)
-  {
-    MyPlayer = player;
-    MyCamera.SetPlayer(player);
-  }
   public void SetNewRespawn(RespawnObj newrespawn) => CurrentRespawn = newrespawn;
-  public void Flooded()
+  public void Flooded() //게임오버 홍수 시작
   {
     StartCoroutine(recoverytime());
     MyCamera.StartFlood();
-    foreach (var stages in AllStages) stages.ResetStage();  //스테이지 전체 초기화
+ //   foreach (var stages in AllStages) stages.ResetStage();  //스테이지 전체 초기화
     foreach (var lights in AllLights) lights.TurnOff();     //모든 불 끄기(카메라 불 빼고)
   }
-  private IEnumerator recoverytime()
+  private IEnumerator recoverytime()  //시간 속도 복구
   {
       float _time = 0.0f;
       while (_time < TimeRecoveryTime)
@@ -114,7 +109,7 @@ public class GameManager : MonoBehaviour
     int _random = Random.Range(0, DeadHindies.Length);
     UIManager.Instance.OutputHindi(DeadHindies[_random].Sprites, DeadHindies[_random].Length);  //텍스트 출력 시작
   }
-  private IEnumerator slowtime()
+  private IEnumerator slowtime()  //시간 정지
   {
     float _time = 0.0f;
     while(_time< TimeSlowTime)
@@ -126,37 +121,15 @@ public class GameManager : MonoBehaviour
     }
     Time.timeScale = 0.0f;
   }
-  public void Spawn()   //게임 최초 시작
-  {
-    StartCoroutine(spawn());
-  }
-  private IEnumerator spawn()
-  {
-    float _cameramovetime = MyCamera.MoveToPosition(CurrentRespawn.ObjPos(),0.0f);;//카메라가 포탈까지 이동하는 시간
-
-    MyTorchPivot.MoveToRespawn(CurrentRespawn.ObjPos(), _cameramovetime ); //토치도 카메라 따라 이동
-  
-    MyPlayerMove.Respawn(CurrentRespawn.GetRespawnPos(), CurrentRespawn.ObjPos().x);  //포탈이 열린 후 리스폰 시작
-   
-    yield return new WaitForSeconds(_cameramovetime);   //카메라 이동하는 동안 대기
-                                                                                         
-    //  MyPortal.Open(NewestLamp.transform.position + Vector3.up * 1.0f);
-
-    //  yield return new WaitForSeconds(MyPortal.OpenningTime);  //포탈이 다 열릴때까지 대기
-
-
-    //  yield return new WaitForSeconds(MyPortal.RespawnTime);    //플레이어가 재생성되는 동안 대기
-
-    MyTorch.Ignite();
-  //  MyPortal.Close();
-  }
   public void Respawn() //플레이어 사망 애니메이션 끝나고 호출
   {
     StartCoroutine(respawn());
   }
   private IEnumerator respawn()
   {
-    float _cameramovetime = MyCamera.MoveToPosition(CurrentRespawn.ObjPos(), 0.0f); ;//카메라가 포탈까지 이동하는 시간
+    MyCamera.SetTarget(PlayerTransform, Vector3.zero);
+
+    float _cameramovetime = MyCamera.MoveToResapwn(CurrentRespawn.ObjPos(), 0.0f); ;//카메라가 포탈까지 이동하는 시간
 
     MyTorchPivot.MoveToRespawn(CurrentRespawn.ObjPos(), _cameramovetime); //토치도 카메라 따라 이동
 
@@ -173,7 +146,10 @@ public class GameManager : MonoBehaviour
     wateruptrans = WaterUp.transform;
     wateruppar = WaterUp.GetComponent<ParticleSystem>();
   }
-
+  public void RockPressed()//돌에 깔려서 쿵찍
+  {
+    MyCamera.RockPressed();
+  }
   public void OpenMask(float _size) { MyMask.Open(_size); CurrentSC.CurrentDimension = Dimension.B; }
   public void CloseMask(float _size) { MyMask.Close(_size); CurrentSC.CurrentDimension = Dimension.A; }
   public void PlayRPParticle() => MyCamera.StartRPParticle();

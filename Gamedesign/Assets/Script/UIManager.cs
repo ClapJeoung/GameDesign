@@ -62,7 +62,7 @@ public class UIManager : MonoBehaviour
     for(int i = 0; i < textcount; i++)
     {
       TextImages[i].enabled = true;
-      yield return StartCoroutine(unscaledtime(TextTime / (textcount - 1)));
+      yield return new WaitForSecondsRealtime(TextTime / (textcount - 1));
     }
     IsSoulDead = true;
   }
@@ -75,17 +75,7 @@ public class UIManager : MonoBehaviour
     {
       _offset=new Vector2(Random.Range(-ShakeDegree,ShakeDegree),Random.Range(-ShakeDegree,ShakeDegree));
       _rect.anchoredPosition = _origin + _offset;
-      yield return StartCoroutine(unscaledtime(1/ShakeCount));
-    }
-  }
-  private IEnumerator unscaledtime(float targettime)
-  {
-  //  Debug.Log("레후~");
-    float _time = 0.0f;
-    while (_time < targettime)
-    {
-      _time += Time.unscaledDeltaTime;
-      yield return null;
+      yield return new WaitForSecondsRealtime(1 / ShakeCount);
     }
   }
   public void FinishText()  //횃불 사망 텍스트 제거하고 홍수 시작

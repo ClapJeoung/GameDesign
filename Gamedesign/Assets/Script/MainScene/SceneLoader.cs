@@ -102,6 +102,6 @@ public class SceneLoader : MonoBehaviour
 
     yield return new WaitForSeconds(0.5f);
 
-    GameManager.Instance.Spawn();
+//    GameManager.Instance.Spawn();
   }
 }

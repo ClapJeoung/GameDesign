@@ -102,7 +102,6 @@ public class Player_Move : MonoBehaviour
   public void Start()
   {
     Setup();
-    GameManager.Instance.SetNewPlayer(this.transform);
   }
   public void Restart() => StartCoroutine(restart());
   private IEnumerator restart()
@@ -268,6 +267,7 @@ public class Player_Move : MonoBehaviour
       if (!collision.GetComponent<Rock>().IsLanding&&IsPlaying)
       {
         Dead_body(Vector2.up*-GetComponent<BoxCollider2D>().bounds.size.y/2,true);
+        GameManager.Instance.RockPressed();
       }//그 돌이 떨어지는 상태라면 육체 죽음
     }
   }
@@ -300,6 +300,8 @@ public class Player_Move : MonoBehaviour
   {
     AudioManager.Instance.PlayClip(2);
     IsPlaying = false;
+    Velocity = Vector2.zero;
+    Accel.x = 0.0f;
     MyTorch.Dead();
 
     Vector2 _bloodrot = Vector2.up * 90.0f + Vector2.right * (-Mathf.Atan2(bloodpos.y, bloodpos.x) * Mathf.Rad2Deg);
