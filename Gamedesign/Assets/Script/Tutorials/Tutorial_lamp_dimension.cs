@@ -60,10 +60,10 @@ public class Tutorial_lamp_dimension : MonoBehaviour,Interactable
       Progress = RequireTime; FiredParticle.Play();
 
         if (MyManager.TutorialDimension == Dimension.A)
-        { GameManager.Instance.OpenMask(MyManager.TutorialRatio); MySpr.sprite = Spr_soul; MyManager.TutorialDimension = Dimension.B;
+        { GameManager.Instance.OpenMask(); MySpr.sprite = Spr_soul; MyManager.TutorialDimension = Dimension.B;
         MyManager.SetStone();
       }       //튜토리얼 전용 이펙트를 만들어야하나
-        else { GameManager.Instance.CloseMask(MyManager.TutorialRatio); MySpr.sprite = Spr_world; MyManager.TutorialDimension = Dimension.A; }
+        else { GameManager.Instance.CloseMask(); MySpr.sprite = Spr_world; MyManager.TutorialDimension = Dimension.A; }
         Progress = 0.0f;
         Ignited = false;
       MyTransform.localScale = Vector3.zero;

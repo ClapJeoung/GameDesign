@@ -42,6 +42,11 @@ public class MainCamera : MonoBehaviour
   private bool IsFlooded = false;                                     //침수 완료됐나요
   [SerializeField] private Light2D MyLight = null;
   private float OriginIntensity = 0.0f;
+  private float OriginSize = 5.4f;                                    //카메라 기본 사이즈
+  [HideInInspector] public float CurrentSizeRatio
+  {
+    get { return MyCamera.orthographicSize / OriginSize; }
+  }
   private void Setup()
   {
     MyTransform = transform;
@@ -78,7 +83,62 @@ public class MainCamera : MonoBehaviour
     OffsetDel();
     MyTransform.position += Offset;
   }
-  public void SetTarget(Transform target,Vector3 offset) //카메라 이동 목표 재설정
+
+  private IEnumerator lerpoffset;
+  private IEnumerator camerasize;
+  private bool IsOffsetLerping = false;
+  public void SetSpecialCamera(Vector2 targetpos,float distanceratio, float sizeratio,float sizetime)
+  {
+    //targetpos를 중심으로 distanceratio만큼 보간한 지점을 TargetOffset으로 업데이트하고 sizeratio만큼 배율 변화
+   if(camerasize!=null)StopCoroutine(camerasize);
+    lerpoffset = keellerp(targetpos, distanceratio);
+    camerasize = changesize(OriginSize * sizeratio, sizetime);
+    StartCoroutine(lerpoffset);
+    StartCoroutine(camerasize);
+  }
+  public void SetSpecialCamera(Vector2 targetoffset,float sizeratio,float sizetime)
+  {
+    if (camerasize != null) StopCoroutine(camerasize);
+    //targetoffset을 TargetOffset으로 지정하고 sizeratio만큼 배율 변화
+    TargetOffset = targetoffset;
+    camerasize = changesize(OriginSize * sizeratio, sizetime);
+    StartCoroutine(camerasize);
+  }
+  public void ResetCamera()
+  {
+    if (IsOffsetLerping) { StopCoroutine(lerpoffset); IsOffsetLerping = false; }  //보간추적중이라면 코루틴을 정지
+    TargetOffset = Vector3.zero;            //코루틴을 정지한다고 TargetOffset이 초기화되는것은 아니니 수동으로 초기화
+    camerasize = changesize(OriginSize, 0.8f);
+    StartCoroutine(camerasize); //카메라 사이즈는 원래대로
+  }
+  private IEnumerator keellerp(Vector3 targetpos,float ratio) //TargetOffset을 계속 보간하는 코루틴
+  {
+    IsOffsetLerping = true;
+    float _movetime = 0.3f;
+    float _time = 0.0f;
+    float _currentratio = 1.0f;
+    while (true)
+    {
+      _currentratio = 1 - (1 - ratio) * (_time / _movetime);
+      TargetOffset = Vector3.Lerp(targetpos, MyTransform.position+Vector3.forward*10.0f, _currentratio) -MyTransform.position + Vector3.forward * 10.0f;
+     if(_time<=_movetime) _time += Time.deltaTime;
+      yield return null;
+    }
+  }
+  private IEnumerator changesize(float targetsize,float sizetime)            //짧은 시간으로 사이즈를 변경하는 코루틴
+  {
+    float _time = 0.0f;
+    float _originsize = MyCamera.orthographicSize;
+    while (_time < sizetime)
+    {
+      MyCamera.orthographicSize = Mathf.Lerp(_originsize, targetsize, Mathf.Pow(_time / sizetime, 1.2f));
+      _time += Time.deltaTime;
+      yield return null;
+    }
+  }
+
+  #region 카메라 목표설정
+  public void SetTarget(Transform target,Vector3 offset) 
   {
     TargetTransform = target;
     TargetOffset = offset;
@@ -97,6 +157,9 @@ public class MainCamera : MonoBehaviour
     TargetTransform = target;
     if (resetoffset) TargetOffset = Vector3.zero;
   }
+  #endregion
+
+  #region 리스폰 관련
   public float MoveToResapwn(Vector3 newpos,float waittime) //리스폰으로 이동
   {
     StartCoroutine(moveto(newpos,waittime));
@@ -129,7 +192,9 @@ public class MainCamera : MonoBehaviour
     IsDead = false;
     TargetOffset = Vector3.zero;
   }
+  #endregion
 
+  #region 돌꽈짖
   public void RockPressed()
   {
     StartCoroutine(rockcoroutine());
@@ -151,6 +216,8 @@ public class MainCamera : MonoBehaviour
     float _speed = 10.0f;
     TargetOffset += Vector3.up * _speed * Time.deltaTime * (isdown ? -1 : 1);
   }
+  #endregion
+
   #region 횃불 사망 홍수
   public void StartFlood()
   {

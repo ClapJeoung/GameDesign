@@ -267,8 +267,8 @@ public class Player_Move : MonoBehaviour
       if (!collision.GetComponent<Rock>().IsLanding&&IsPlaying)
       {
         Dead_body(Vector2.up*-GetComponent<BoxCollider2D>().bounds.size.y/2,true);
-        GameManager.Instance.RockPressed();
-      }//그 돌이 떨어지는 상태라면 육체 죽음
+     //   GameManager.Instance.RockPressed();
+      }//그 돌이 떨어지는 상태라면 육체 죽음      적용해보니까 구려서 뺐음
     }
   }
   public void RollingStones()

@@ -97,8 +97,8 @@ public class Lamp_event : MonoBehaviour, Interactable,Lightobj
       if (MyLampType == LampType.Dimension)
       {
         if (GameManager.Instance.CurrentSC.CurrentDimension == Dimension.A)
-        { GameManager.Instance.OpenMask(1.0f); MySpr.sprite = Spr_soul; }
-        else { GameManager.Instance.CloseMask(1.0f);MySpr.sprite = Spr_world; }
+        { GameManager.Instance.OpenMask(); MySpr.sprite = Spr_soul; }
+        else { GameManager.Instance.CloseMask();MySpr.sprite = Spr_world; }
         Progress = 0.0f;
         Ignited = false;
       }

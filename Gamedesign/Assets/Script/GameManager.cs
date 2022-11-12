@@ -42,7 +42,7 @@ public class GameManager : MonoBehaviour
     MyPlayerMove=PlayerTransform.GetComponent<Player_Move>();
     CurrentRespawn = OriginRespawn;
   }
-  [SerializeField] private MainCamera MyCamera = null;
+  public MainCamera MyCamera = null;
   private void Update()
   {
 //    if (Input.GetKeyDown(KeyCode.Tab)) Spawn();
@@ -83,7 +83,7 @@ public class GameManager : MonoBehaviour
   }
   public void FinishTutorial()      //튜토리얼 끝나고 호출
   {
-    if (CurrentSC.CurrentDimension != CurrentSC.DefaultDimension) CloseMask(1.0f);
+    if (CurrentSC.CurrentDimension != CurrentSC.DefaultDimension) CloseMask();
     MyTorchPivot.FinishTutorial();
     Respawn();
   }
@@ -91,8 +91,8 @@ public class GameManager : MonoBehaviour
   {
     if (CurrentSC.CurrentDimension != CurrentSC.DefaultDimension)
     {
-      if (CurrentSC.DefaultDimension == Dimension.A) CloseMask(1.0f);
-      else OpenMask(1.0f);
+      if (CurrentSC.DefaultDimension == Dimension.A) CloseMask();
+      else OpenMask();
     }
     MyTorchPivot.Dead();
     CurrentSC.ResetStage(); //현재 스테이지만 초기화
@@ -150,7 +150,7 @@ public class GameManager : MonoBehaviour
   {
     MyCamera.RockPressed();
   }
-  public void OpenMask(float _size) { MyMask.Open(_size); CurrentSC.CurrentDimension = Dimension.B; }
-  public void CloseMask(float _size) { MyMask.Close(_size); CurrentSC.CurrentDimension = Dimension.A; }
-  public void PlayRPParticle() => MyCamera.StartRPParticle();
+  public void OpenMask() { MyMask.Open(MyCamera.CurrentSizeRatio); CurrentSC.CurrentDimension = Dimension.B; }   //일반계 -> 영혼계
+  public void CloseMask() { MyMask.Close(MyCamera.CurrentSizeRatio); CurrentSC.CurrentDimension = Dimension.A; } //영혼계 -> 일반계
+  public void PlayRPParticle() => MyCamera.StartRPParticle(); //리스폰파티클 시작(카메라 스크립트에서 호출)
 }

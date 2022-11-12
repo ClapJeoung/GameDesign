@@ -27,8 +27,7 @@ public class AudioManager : MonoBehaviour
       else if (i == 1) BackgroundSource_1 = _temp[i];
       else EffectSources[i - 2] = _temp[i];
     }
-    Debug.Log(EffectSources.Length);
-    BackgroundSource_0.clip = Background;
+//    BackgroundSource_0.clip = Background;
     BackgroundSource_0.volume = BackgroundVolume;
     BackgroundSource_0.Play();
   }

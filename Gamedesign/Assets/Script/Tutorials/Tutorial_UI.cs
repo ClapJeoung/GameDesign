@@ -47,7 +47,7 @@ public class Tutorial_UI : MonoBehaviour
         StageEyes[1].sprite = OpenEye;
         StageParticles[1].Play();
         Particle_R.Play();
-        GameManager.Instance.CloseMask(MyManager.TutorialRatio);
+        GameManager.Instance.CloseMask();
         break;
       case 0: //0개 남을때 불탔다 : 3단계 클리어
        // LampSpr.enabled=false;
