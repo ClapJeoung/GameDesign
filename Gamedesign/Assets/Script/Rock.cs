@@ -71,7 +71,7 @@ public class Rock : MonoBehaviour
   }
   private void Start()
   {
-   Invoke("Setup",0.01f);
+    Setup();
   }
   public virtual void VerticalRaycast()
   {
@@ -126,7 +126,7 @@ public class Rock : MonoBehaviour
     Dust_0.Play();
     Dust_1.Play();
   }
-  private void Update()
+  private void FixedUpdate()
   {
     if (GameManager.Instance.CurrentSC != MySC) return; //현재 스테이지가 내 스테이지가 아니라면 물리효과 대기
 

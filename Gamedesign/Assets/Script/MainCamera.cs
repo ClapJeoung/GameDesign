@@ -56,12 +56,13 @@ public class MainCamera : MonoBehaviour
     particle_soul_shape = Particle_soul.shape;
     MyCamera = GetComponent<Camera>();
     OffsetDel = new Action(() => { });
+    FloodTrans.GetComponent<SpriteRenderer>().enabled = false;
   }
   private void Start()
   {
     Setup();
   }
-  private void Update()
+  private void LateUpdate()
   {
     //  particle_world_shape.position = new Vector3(MyTransform.position.x, MyTransform.position.y + 5.5f, -1.0f);
 
@@ -77,12 +78,35 @@ public class MainCamera : MonoBehaviour
     LastPos = MyTransform.position;
     Offset = Vector3.zero;
     Vector3 _newpos = Vector3.zero;
-    _newpos = Vector3.Lerp(MyTransform.position, TargetTransform.position + TargetOffset, Time.deltaTime * CameraSpeed);
+    _newpos = Vector3.Lerp(MyTransform.position, TargetTransform.position + TargetOffset+Vector3.up*0.5f, Time.deltaTime * CameraSpeed);
     _newpos = new Vector3(_newpos.x, Mathf.Clamp(_newpos.y, MinY, MaxY), -10.0f);
     Offset = _newpos - LastPos;
     OffsetDel();
     MyTransform.position += Offset;
   }
+
+  private IEnumerator rockshakecoroutine;
+  public void StartSpinRock()
+  {
+    rockshakecoroutine = rockshake();
+    StartCoroutine(rockshakecoroutine);
+  }
+  private IEnumerator rockshake() //기둥 부수고 진동
+  {
+    Vector3 _originpos = MyTransform.position;
+    Vector3 _offset = Vector3.zero;
+    var _wait= new WaitForSeconds(1.0f / Flood_shakecount);
+    while (true)
+    {
+      _originpos = MyTransform.position;
+      _offset = new Vector3(UnityEngine.Random.Range(-Flood_shakedeg, Flood_shakedeg), UnityEngine.Random.Range(-Flood_shakedeg, Flood_shakedeg));
+      MyTransform.position = _originpos + _offset;
+      yield return _wait;
+    }
+  }
+  public void EndSpinRock() => StopCoroutine(rockshakecoroutine);
+
+  #region CameraEvent 관련 함수
 
   private IEnumerator lerpoffset;
   private IEnumerator camerasize;
@@ -136,6 +160,7 @@ public class MainCamera : MonoBehaviour
       yield return null;
     }
   }
+  #endregion
 
   #region 카메라 목표설정
   public void SetTarget(Transform target,Vector3 offset) 
@@ -221,6 +246,7 @@ public class MainCamera : MonoBehaviour
   #region 횃불 사망 홍수
   public void StartFlood()
   {
+    FloodTrans.GetComponent<SpriteRenderer>().enabled = true;
     IsDead = true;
     StartCoroutine(flood_move());
     StartCoroutine(flood_angle());

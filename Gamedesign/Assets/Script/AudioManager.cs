@@ -36,7 +36,7 @@ public class AudioManager : MonoBehaviour
     foreach(AudioSource clip in EffectSources)
     {
       if (clip.isPlaying) continue;
-      else { clip.clip = MyClipis[i];clip.Play(); break; }
+      else { clip.clip = MyClipis[i]; clip.Play(); break; }
     }
   }
   private List<int> BubbleList=new List<int>();

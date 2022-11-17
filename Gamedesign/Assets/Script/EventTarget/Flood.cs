@@ -11,7 +11,9 @@ public class Flood : EventTarget
   private float Progress = 0.0f;
   private bool IsDone = false;
   private Transform MyTransform = null;
-
+  [SerializeField] private float[] SpringPos = new float[3];
+  [SerializeField] private BoxCollider2D MyCol = null;
+  [SerializeField] private ParticleSystem[] WaveParticle = null;
   public void Setup()
   {
     MyTransform = transform;
@@ -23,18 +25,22 @@ public class Flood : EventTarget
   }
   public override void Active()
   {
-    if (IsDone) return;
+  //  if (IsDone) return;
     StopAllCoroutines();
     StartCoroutine(startfilling());
+    StartCoroutine(updatewave());
   }
   public override void Deactive()
   {
-    if (IsDone) return;
+  //  if (IsDone) return;
     StopAllCoroutines();
     StartCoroutine(startdraining());
   }
   private IEnumerator startfilling()
   {
+    WaveParticle[0].Play();
+    WaveParticle[1].Play();
+    WaveParticle[2].Play();
     while (Progress < FillingTime)
     {
       MyTransform.position = Vector2.Lerp(OriginPos, TargetPos, Progress / FillingTime);
@@ -45,10 +51,33 @@ public class Flood : EventTarget
   }
   private IEnumerator startdraining()
   {
+    WaveParticle[0].Stop();
+    WaveParticle[1].Stop();
+    WaveParticle[2].Stop();
     while (Progress > 0)
     {
       MyTransform.position = Vector2.Lerp(OriginPos, TargetPos, Progress / FillingTime);
       Progress -= Time.deltaTime * DrainingSpeed;
+      yield return null;
+    }
+  }
+  private IEnumerator updatewave()
+  {
+    float _currenty=  MyCol.bounds.size.y / 2.0f-0.2f;
+    Vector2[] _newpos = new Vector2[3];
+    ParticleSystem.ShapeModule[] _shapes = new ParticleSystem.ShapeModule[3];
+    for(int i = 0; i < 3; i++)
+    {
+      _newpos[i]=new Vector2(SpringPos[i],_currenty);
+      _shapes[i] = WaveParticle[i].shape;
+    }
+    while (true)
+    {
+      for (int i = 0; i < 3; i++)
+      {
+        _shapes[i].position = MyTransform.position + (Vector3)_newpos[i]+Vector3.back*0.1f;
+        yield return null;
+      }
       yield return null;
     }
   }
@@ -58,6 +87,15 @@ public class Flood : EventTarget
     {
       StopAllCoroutines();
       StartCoroutine(startdraining());
+    }
+  }
+  private void OnDrawGizmos()
+  {
+    Gizmos.color = Color.blue;
+    float _y =  MyCol.bounds.size.y/2.0f;
+    for(int i = 0; i < SpringPos.Length; i++)
+    {
+      Gizmos.DrawSphere((Vector2)transform.position + new Vector2(SpringPos[i], _y),1.0f);
     }
   }
 }

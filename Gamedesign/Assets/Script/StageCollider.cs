@@ -16,7 +16,8 @@ public class StageCollider : MonoBehaviour
   private List<Rock> MyRocks = new List<Rock>();
   private List<Wooden> MyWoodens = new List<Wooden>();
   private List<Lamp_event> MyLamps=new List<Lamp_event>();
-  public SpinRock MySpinRock = null;
+ [HideInInspector] public SpinRock MySpinRock = null;
+  private WoodenPillar MyPillar = null;
   public StageCollider SetOrigin(Rock newrock)
   {
     MyRocks.Add(newrock); return this;
@@ -29,12 +30,17 @@ public class StageCollider : MonoBehaviour
   {
     MyLamps.Add(newlamp);return this;
   }
+  public StageCollider SetOrigin(WoodenPillar newpillar)
+  {
+    MyPillar = newpillar;return this;
+  }
   public void ResetStage()
   {
     foreach (var rock in MyRocks) rock.Resetpos();
     foreach (var wooden in MyWoodens) wooden.ResetDimension();
     foreach (var lamp in MyLamps) lamp.ResetLamp();
     if (MySpinRock != null) MySpinRock.Resetpos();
+    if (MyPillar != null) MyPillar.ResetDimension();
   }
   public void Setup()
   {

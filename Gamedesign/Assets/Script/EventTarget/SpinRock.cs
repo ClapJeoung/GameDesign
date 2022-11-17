@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SpinRock:MonoBehaviour
+public class SpinRock:EventTarget
 {
   [SerializeField] private float SpinDeg = 270.0f;
   [SerializeField] private int VertexCount = 5;
@@ -11,21 +11,15 @@ public class SpinRock:MonoBehaviour
   private Vector2[] BottomVertex = null;
   private Vector2 Velocity = Vector2.zero;
   [SerializeField] private float Gravity = -9.8f;
-  private int conveyor = 0;
-  private int Conveyor
-  {
-    get { return conveyor; }  
-    set {
-      if (conveyor != 0 && value == 0) {IsPlaying = false;  }
-
-        conveyor = value;
-    }
-  }
-  [SerializeField] private float ConveyorSpeed = 5.0f;
+  [SerializeField] private float MoveSpeed = 5.0f;
   private StageCollider MySC = null;
   private Vector3 Originpos = Vector2.zero;
   private float ResetTime = 3.0f;
-  private bool IsPlaying = false;
+  [HideInInspector] public bool IsPlaying = false;
+  [SerializeField] private Transform TargetPos = null;
+  float TargetX = 0.0f;
+  [SerializeField] private ParticleSystem DustParticle = null;
+  [SerializeField] private ParticleSystem DestroyParticle = null;
 
   private void OnTriggerEnter2D(Collider2D collision)
   {
@@ -41,7 +35,7 @@ public class SpinRock:MonoBehaviour
   }
   public void Setup()
   {
-    IsPlaying = true;
+    TargetX=TargetPos.position.x;
     MySC = transform.parent.GetComponent<StageCollider>();
     MySC.MySpinRock = this;
     MyTransform = transform;
@@ -101,13 +95,9 @@ public class SpinRock:MonoBehaviour
 
         if (_targethit.transform.CompareTag("Breakable"))
           _targethit.transform.GetComponent<Breakable>().Pressed(); //밟아서 부숴지는 이벤트 실행
-        else if (_targethit.transform.CompareTag("Conveyor_R")) Conveyor = 1;
-        else if (_targethit.transform.CompareTag("Conveyor_L")) Conveyor = -1;
-        else Conveyor = 0;
         return;
       }
     }
-    Conveyor = 0; //for 다 돌려서 여기까지 도착한거면 적어도 바닥에 컨베이어가 없다는것
   }
   private void Update()
   {
@@ -118,23 +108,57 @@ public class SpinRock:MonoBehaviour
     VerticalRaycast();
 
     if (Velocity.y <= 0.05f && Velocity.y >= -0.05f) Velocity.y = 0;
-    MyTransform.Translate((Velocity + Vector2.right * ConveyorSpeed * Conveyor) * Time.deltaTime);
+    MyTransform.Translate((Velocity + Vector2.right * MoveSpeed) * Time.deltaTime);
+    if (MyTransform.position.x >= TargetX) Destroyed();
   }
-  public virtual void Resetpos() => StartCoroutine(resetpos());
+  public  void Resetpos() => StartCoroutine(resetpos());
   private IEnumerator resetpos()
   {
-    Conveyor = 0;
+    Destroyed();
     IsPlaying = false;
     float _time = 0.0f;
     Vector3 _currentpos = MyTransform.position;
+   SpriteRenderer _myspr= SpinTransform.GetComponent<SpriteRenderer>();
+    float _alpha = 0.0f;
+    Color _color = Color.white;
+    _color.a = _alpha;
+    _myspr.enabled = true;
     while (_time < ResetTime)
     {
-      Debug.Log(IsPlaying);
       MyTransform.position = Vector3.Lerp(_currentpos, Originpos, Mathf.Sqrt(_time / ResetTime));
+      _alpha = _time / ResetTime;
+      _color.a = _alpha;
+      _myspr.color = _color;
       _time += Time.deltaTime;
       yield return null;
     }
-    IsPlaying = true;
+    _color.a = 1.0f;
+    _myspr.color = _color;
   }
+  public override void Active()
+  {
+    if (IsPlaying) return;
+    Debug.Log("레후");
+    IsPlaying = true;
+    DustParticle.Play();
+    SpinTransform.GetComponent<SpriteRenderer>().enabled = true;
+    GameManager.Instance.MyCamera.StartSpinRock();
+  }
+  public void Destroyed()
+  {
+    if (!IsPlaying) return;
+    IsPlaying = false;
+    SpinTransform.GetComponent<SpriteRenderer>().enabled = false;
+    DestroyParticle.Play();
+    DustParticle.Stop();
+    GameManager.Instance.MyCamera.EndSpinRock();
+  }
+  private void OnDrawGizmos()
+  {
+    if (TargetPos == null) return;
+    Gizmos.color = Color.red;
+    Gizmos.DrawLine(transform.position, TargetPos.position);
+  }
+  public override void Deactive() { Destroyed(); }
 
 }

@@ -45,6 +45,7 @@ public class GameManager : MonoBehaviour
   public MainCamera MyCamera = null;
   private void Update()
   {
+    Debug.Log(CurrentSC.name);
 //    if (Input.GetKeyDown(KeyCode.Tab)) Spawn();
   }
   private void Start()

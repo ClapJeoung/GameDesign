@@ -10,7 +10,7 @@ public class Skull : MonoBehaviour
     GetComponent<SpriteRenderer>().sprite=Sprites[Random.Range(0,Sprites.Length)];
     Vector2 _newpos = new Vector2(currentpos.x , Mathf.Round(currentpos.y * 2.0f) / 2.0f);
     transform.position = _newpos;
-    Debug.Log($"{currentpos} -> {_newpos}");
+//    Debug.Log($"{currentpos} -> {_newpos}");
     //180,90,0,-90
     float _z = 180.0f - 90.0f * rot;
     transform.eulerAngles = Vector3.forward * rot;

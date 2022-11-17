@@ -61,6 +61,10 @@ public class Player_Move : MonoBehaviour
   private ParticleSystem.ShapeModule DeadShape_body;
   [SerializeField] private ParticleSystem DeadParticle_soul = null; //플레이어 불타는 파티클
   private ParticleSystem.ShapeModule DeadShape_soul;
+  [SerializeField] private ParticleSystem WalkParticle = null;  //걷는 먼지 파티클
+  private ParticleSystem.ShapeModule WalkShape;
+  [SerializeField] private ParticleSystem JumpParticle = null;  //점프 먼지 파티클
+  private ParticleSystem.ShapeModule JumpShape;
   private bool flipx = true;                  //이미지 좌우반전용 변수
   private bool IsPlaying = true;              //현재 조작 가능한 상태인가?
   private bool IsPressing = false;            //현재 A나 D를 누르고 있는가?
@@ -95,9 +99,12 @@ public class Player_Move : MonoBehaviour
     WaterUpShape = WaterUpParticle.shape;
     DeadShape_body = DeadParticle_body.shape;
     DeadShape_soul=DeadParticle_soul.shape;
+    WalkShape= WalkParticle.shape;
+    JumpShape= JumpParticle.shape;
     MyBound.Expand(+Expanddegree);
     IsDead = true;
     IsPlaying = false;
+    StartCoroutine(updatewalkparticle());
   }
   public void Start()
   {
@@ -110,7 +117,6 @@ public class Player_Move : MonoBehaviour
   }
   private void UpdateMove()
   {
-    if (Input.GetKeyDown(KeyCode.Escape)) Time.timeScale = 0.3f;
     if (IsDead) return;
 
     Accel.y = GrvtDegree;
@@ -124,17 +130,22 @@ public class Player_Move : MonoBehaviour
       }
 
       Accel.x = 0;
-      if (Input.GetKey(KeyCode.D)) { Accel.x = AccelDegree; flipx = false; IsPressing = true; }                      //좌측 버튼 : 가속도가 +
-      else if (Input.GetKey(KeyCode.A)) { Accel.x = -AccelDegree; flipx = true; IsPressing = true; }                 //우측 버튼 : 가속도가 -
+      if (Input.GetKey(KeyCode.D)) { Accel.x = AccelDegree; flipx = false; IsPressing = true; } 
+      //좌측 버튼 : 가속도가 +
+      else if (Input.GetKey(KeyCode.A)) { Accel.x = -AccelDegree; flipx = true; IsPressing = true; }
+      //우측 버튼 : 가속도가 -
       else {
         IsPressing = false;
-        Accel.x = (NextVelocity.x != 0 ? Mathf.Sign(NextVelocity.x) : 0) * AccelResist; }//아무것도 안 누름 : 가속도가 속도 반대로
-
+        Accel.x = (NextVelocity.x != 0 ? Mathf.Sign(NextVelocity.x) : 0) * AccelResist;
+      }//아무것도 안 누름 : 가속도가 속도 반대로
     }
 
     if (Input.GetKey(KeyCode.Space) && Jumpable) Jump();//점프
 
     if(MySpr.flipX!=flipx)MySpr.flipX = flipx;
+
+    if (IsPressing && Jumpable && !WalkParticle.isPlaying) WalkParticle.Play(); //점프 가능한 상태에서 걷기 입력하고 있으면 걷기 파티클
+    else if ((!IsPressing || !Jumpable) && WalkParticle.isPlaying) WalkParticle.Stop();//점프가 불가능하거나 걷지 않은 상태에서 걷기 파티클 중이라면 중지 
 
 
     NextVelocity += Accel * Time.deltaTime; //속도에 가속추가
@@ -166,6 +177,9 @@ public class Player_Move : MonoBehaviour
     NextVelocity = new Vector2(NextVelocity.x, JumpPower); 
     JumpTime += Time.deltaTime; 
     MyAnimator.SetTrigger("Jump");
+    Vector3 _particlepos = new Vector3(0.0f, Vertex_bottom[0].y, 0.0f);
+    JumpShape.position = MyTransform.position + _particlepos;
+    JumpParticle.Play();
   }
   private void RaycastVertical()  //위아래 검사
   {
@@ -264,11 +278,12 @@ public class Player_Move : MonoBehaviour
     }
     else if (collision.CompareTag("Rock"))  //돌에 닿았고
     {
-      if (!collision.GetComponent<Rock>().IsLanding&&IsPlaying)
-      {
-        Dead_body(Vector2.up*-GetComponent<BoxCollider2D>().bounds.size.y/2,true);
-     //   GameManager.Instance.RockPressed();
-      }//그 돌이 떨어지는 상태라면 육체 죽음      적용해보니까 구려서 뺐음
+      Rock _rock=collision.GetComponent<Rock>();
+      if (_rock!=null&&_rock.IsLanding && IsPlaying) { Dead_body(Vector2.up * -GetComponent<BoxCollider2D>().bounds.size.y / 2, true); return; }
+      SpinRock _spinrock = collision.GetComponent<SpinRock>();
+      if(_spinrock!=null&& _spinrock.IsPlaying && IsPlaying) { Dead_body(Vector2.up * -GetComponent<BoxCollider2D>().bounds.size.y / 2, true); return; }
+
+      //그 돌이 떨어지는 상태라면 육체 죽음      화면 움직이는건 적용해보니까 구려서 뺐음
     }
   }
   public void RollingStones()
@@ -311,7 +326,8 @@ public class Player_Move : MonoBehaviour
     DeadParticle_body.Play();           //지벳
     if (isrock) MySprTransform.localScale = new Vector3(1.0f, 0.2f, 1.0f);
 
-    if (bloodpos.y<=0) yield return new WaitForSeconds(0.15f); //조작만 중지시키고 대충 바닥에 닿을 때까지 대기
+    if (bloodpos.y<=0) yield return new WaitUntil(() => { return Jumpable == true; }); //바닥에 찔린거라면 조작만 중지시키고 대충 바닥에 닿을 때까지 대기
+
     if (isrock) yield return new WaitForSeconds(0.75f); //돌에 깔린거면 바닥에 닿을때까지 대기
 
     IsDead = true;
@@ -390,6 +406,7 @@ public class Player_Move : MonoBehaviour
     IsDead = false;
     Accel.x = AccelDegree;
     flipx = false;
+    WalkParticle.Play();
       yield return new WaitUntil(() => { return MyTransform.position.x >= targetx; });
     Debug.Log("새로운 시작인 레후~");
     IsWater = false;
@@ -413,6 +430,19 @@ public class Player_Move : MonoBehaviour
     {
       MyTransform.position = Vector3.Lerp(_oldpos, newpos, _time / movetime)+Vector3.back*3.0f;
       _time += Time.deltaTime;
+      yield return null;
+    }
+  }
+  private IEnumerator updatewalkparticle()
+  {
+    Vector3 _newpos_x = Vector2.right * Vertex_left[0].x;
+    Vector3 _newpos_y = Vector2.up * Vertex_bottom[0].y;
+    Vector3 _rot_x = Vector3.right * -70.0f;
+    Vector3 _rot_y = Vector3.up * -90.0f;
+    while (true)
+    {
+      WalkShape.position = MyTransform.position + _newpos_y + _newpos_x * (flipx?-1:1);
+      WalkShape.rotation=_rot_x+ _rot_y * (flipx ? -1 : 1);
       yield return null;
     }
   }

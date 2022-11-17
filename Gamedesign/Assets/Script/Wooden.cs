@@ -145,11 +145,14 @@ public class Wooden : MonoBehaviour,Interactable,Lightobj
     Spr_C.size = Spr_B.size;
     GetComponent<BoxCollider2D>().size= Spr_A.size;
     ParticleSystem.ShapeModule myshape = FiredParticle.shape;
-    myshape.scale =new Vector3( Spr_A.size.x,0.3f,1.0f);
+    myshape.scale =new Vector3( Spr_A.size.x, Spr_A.size.y, 1.0f);
     if (MyDimension == Dimension.A) Spr_B.enabled = false;
     else if(MyDimension== Dimension.B) Spr_A.enabled = false;
     OriginDimension = MyDimension;
     GameManager.Instance.AllLights.Add(this);
+    float _min = 15.0f, _max = 40.0f,_minsize=1.0f,_maxsize=10.0f,_size= Spr_A.size.x* Spr_A.size.y;
+    ParticleSystem.EmissionModule _emi = FiredParticle.emission;
+    _emi.rateOverTime = Mathf.Lerp(_min, _max,  _size/ _maxsize);
   }
   private void Start()
   {
