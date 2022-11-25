@@ -99,7 +99,7 @@ public class Tomb : EventTarget
       yield return null;
     }
     //어느정도 시간 흘렀으면 페이드아웃
-    UIManager.Instance.FadeOut(4.0f);
+    UIManager.Instance.FadeOut(4.0f,false);
     yield return new WaitForSeconds(4.5f);
     SceneManager.LoadScene(0);
   }

@@ -6,7 +6,7 @@ using UnityEngine.Rendering.Universal;
 public class FIreMask : MonoBehaviour
 {
   private Transform MyTransform = null;
-  [SerializeField] private float EffectTime = 0.1f;
+  [SerializeField] private float EffectTime = 0.8f;
   [SerializeField] private float ClosePos = -16.0f;
   [SerializeField] private float OpenPos = -3.0f;
   [SerializeField] private ParticleSystem Particle_world = null;
@@ -15,6 +15,7 @@ public class FIreMask : MonoBehaviour
   private SpriteMask MyMask = null;
   [SerializeField] private Light2D PlayerLight = null;
   [SerializeField] private Transform FireTrans = null;
+  [SerializeField] private ParticleSystem Particle_Change = null; //ÆÄÆ¼Å¬
   private void Start()
   {
     Setup();
@@ -24,11 +25,30 @@ public class FIreMask : MonoBehaviour
   {
     MyTransform= transform;
   }
-  public void Open(float newsize)
+  public void Open(Vector2 newpos)
   {
-    StartCoroutine(open(newsize));
+    StartCoroutine(open(newpos));
   }
-  private IEnumerator open(float _size)
+  private IEnumerator open(Vector2 newpos)
+  {
+    AudioManager.Instance.PlayClip(0);
+    float _targetradius = GetLength(newpos);
+    MyTransform.position = newpos;
+    Particle_Change.transform.position = (Vector3)newpos + Vector3.back * 8.0f;
+    ParticleSystem.ShapeModule _shape = Particle_Change.shape;
+    _shape.radius = 0.0f;
+    MyTransform.localScale = Vector3.one*0.0f;
+    Particle_Change.Play();
+    float _time = 0.0f;
+    while(_time< EffectTime)
+    {
+      MyTransform.localScale = Vector3.one * Mathf.Lerp(0.0f, _targetradius * 2.0f, Mathf.Pow((_time / EffectTime), 2.0f));
+      _shape.radius = Mathf.Lerp(0.0f, _targetradius, Mathf.Pow((_time / EffectTime), 2.0f));
+      _time += Time.deltaTime; yield return null;
+    }
+    Particle_Change.Stop();
+  }
+  private IEnumerator open_old(float _size)
   {
     // Debug.Log(_size);
     AudioManager.Instance.PlayClip(0);
@@ -40,11 +60,31 @@ public class FIreMask : MonoBehaviour
     yield return new WaitForSeconds(0.5f);
     FireTrans.localScale = Vector3.one * _originsize;
   }
-  public void Close(float _size)
+  public void Close(Vector2 newpos)
   {
-    StartCoroutine(close(_size));
+    StartCoroutine(close(newpos));
   }
-  private IEnumerator close(float _size)
+  private IEnumerator close(Vector2 newpos)
+  {
+    float _targetradius = GetLength(newpos);
+    AudioManager.Instance.PlayClip(0);
+    MyTransform.position = newpos;
+    Particle_Change.transform.position = (Vector3)newpos+Vector3.back*8.0f;
+    ParticleSystem.ShapeModule _shape = Particle_Change.shape;
+    _shape.radius = _targetradius;
+    MyTransform.localScale = Vector3.one * _targetradius*2.0f;
+    Particle_Change.Play();
+    float _time = 0.0f;
+    while (_time < EffectTime)
+    {
+      MyTransform.localScale = Vector3.one *Mathf.Lerp(_targetradius*2.0f, 0.0f, Mathf.Pow(_time / EffectTime,2.0f));
+      _shape.radius =  Mathf.Lerp(_targetradius , 0.0f, Mathf.Pow((_time / EffectTime), 2.0f))/1.5f;
+      _time += Time.deltaTime; yield return null;
+    }
+    MyTransform.localScale = Vector3.zero;
+    Particle_Change.Stop();
+  }
+  private IEnumerator close_old(float _size)
   {
     AudioManager.Instance.PlayClip(0);
     float _originsize = FireTrans.localScale.x;
@@ -71,5 +111,12 @@ public class FIreMask : MonoBehaviour
     }
     if (istoworld) Particle_soul.Stop();
     else Particle_world.Stop();
+  }
+  public float GetLength(Vector2 pos)
+  {
+    Vector2 _pos = pos - (Vector2)MyTransform.position;
+    float _size=5.4f/Camera.main.orthographicSize, _width = 9.6f* _size + Mathf.Abs(_pos.x), _height = 5.4f * _size + Mathf.Abs(_pos.y);
+//    Debug.Log($"width : {_width}  height : {_height}  length : { Vector2.Distance(Vector2.zero, new Vector2(_width, _height))}");
+    return Vector2.Distance(Vector2.zero,new Vector2(_width, _height))+0.1f;
   }
 }

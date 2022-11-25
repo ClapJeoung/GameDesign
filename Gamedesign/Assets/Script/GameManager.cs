@@ -45,7 +45,7 @@ public class GameManager : MonoBehaviour
   public MainCamera MyCamera = null;
   private void Update()
   {
-    Debug.Log(CurrentSC.name);
+//    Debug.Log(CurrentSC.name);
 //    if (Input.GetKeyDown(KeyCode.Tab)) Spawn();
   }
   private void Start()
@@ -84,7 +84,7 @@ public class GameManager : MonoBehaviour
   }
   public void FinishTutorial()      //튜토리얼 끝나고 호출
   {
-    if (CurrentSC.CurrentDimension != CurrentSC.DefaultDimension) CloseMask();
+    if (CurrentSC.CurrentDimension != CurrentSC.DefaultDimension) CloseMask(transform.position);
     MyTorchPivot.FinishTutorial();
     Respawn();
   }
@@ -92,8 +92,8 @@ public class GameManager : MonoBehaviour
   {
     if (CurrentSC.CurrentDimension != CurrentSC.DefaultDimension)
     {
-      if (CurrentSC.DefaultDimension == Dimension.A) CloseMask();
-      else OpenMask();
+      if (CurrentSC.DefaultDimension == Dimension.A) CloseMask(MyCamera.transform.position);
+      else OpenMask(MyCamera.transform.position);
     }
     MyTorchPivot.Dead();
     CurrentSC.ResetStage(); //현재 스테이지만 초기화
@@ -106,9 +106,11 @@ public class GameManager : MonoBehaviour
   public void Dead_soul_1() //플레이어 사망 연출 이후 호출
   {
     MyCamera.StartFloodParticle();
+    CurrentSC.StopAllPots();
     StartCoroutine(slowtime());                              //주위 정지
     int _random = Random.Range(0, DeadHindies.Length);
     UIManager.Instance.OutputHindi(DeadHindies[_random].Sprites, DeadHindies[_random].Length);  //텍스트 출력 시작
+    AudioManager.Instance.PlayClip(13);
   }
   private IEnumerator slowtime()  //시간 정지
   {
@@ -151,7 +153,7 @@ public class GameManager : MonoBehaviour
   {
     MyCamera.RockPressed();
   }
-  public void OpenMask() { MyMask.Open(MyCamera.CurrentSizeRatio); CurrentSC.CurrentDimension = Dimension.B; }   //일반계 -> 영혼계
-  public void CloseMask() { MyMask.Close(MyCamera.CurrentSizeRatio); CurrentSC.CurrentDimension = Dimension.A; } //영혼계 -> 일반계
+  public void OpenMask(Vector2 newpos) { MyMask.Open(newpos); CurrentSC.CurrentDimension = Dimension.B; }   //일반계 -> 영혼계
+  public void CloseMask(Vector2 newpos) { MyMask.Close(newpos); CurrentSC.CurrentDimension = Dimension.A; } //영혼계 -> 일반계
   public void PlayRPParticle() => MyCamera.StartRPParticle(); //리스폰파티클 시작(카메라 스크립트에서 호출)
 }

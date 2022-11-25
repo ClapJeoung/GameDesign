@@ -59,7 +59,7 @@ public class Torch : MonoBehaviour
 
     if (collision.CompareTag("Interactable")) {CurrentInteract= collision.GetComponent<Interactable>();CurrentInteract.FireUp(); }
     else if (collision.CompareTag("Recharge")) IsRecharging = true;
-    else if (collision.CompareTag("Water"))
+    else if (collision.CompareTag("Water")||collision.CompareTag("Waterfall"))
     {
       if (FirePower > 0.0f)
       {

@@ -76,6 +76,7 @@ public class Tutorial_Wooden : MonoBehaviour, Interactable
       {
         SmokeParticle.Stop();                     //검은연기 파티클 종료
         BurningParticle.Play();                   //불타는 파티클 실행
+        AudioManager.Instance.PlayFire();
       }
       return;
     }
@@ -96,6 +97,7 @@ public class Tutorial_Wooden : MonoBehaviour, Interactable
         Progress = 0.0f;
         IsFired = false;
         MyManager.Fired();  //화끈해진레후
+        AudioManager.Instance.StopFire(true);
       }
     }
   }

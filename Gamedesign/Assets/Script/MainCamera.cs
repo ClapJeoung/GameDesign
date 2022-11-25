@@ -64,14 +64,21 @@ public class MainCamera : MonoBehaviour
   }
   private void LateUpdate()
   {
+    if (finalwait) return;
     //  particle_world_shape.position = new Vector3(MyTransform.position.x, MyTransform.position.y + 5.5f, -1.0f);
 
-    if (Input.anyKeyDown && IsFlooded) SceneManager.LoadScene(0); //겜 끝나고 아무거나 누르면 재시작
+    if (Input.anyKeyDown && IsFlooded) LoadNewGame(); //겜 끝나고 아무거나 누르면 재시작
 
     particle_soul_shape.position = new Vector3(MyTransform.position.x, MyTransform.position.y, 8.0f); //영혼계 파티클 위치 계속 업데이트
 
 
     if (!IsDead) UpdateOffset(); //죽으면 안움직임
+  }
+  private bool finalwait = false;
+  public void LoadNewGame()
+  {
+    finalwait = true;
+    UIManager.Instance.TurnOffRestartLogo();
   }
   public void UpdateOffset()
   {
@@ -250,7 +257,13 @@ public class MainCamera : MonoBehaviour
     IsDead = true;
     StartCoroutine(flood_move());
     StartCoroutine(flood_angle());
-    UIManager.Instance.FadeOut(Flood_FadeOutTime);
+    UIManager.Instance.FadeOut(Flood_FadeOutTime,true);
+    Invoke("stopthat", Flood_FadeOutTime + 1.0f);
+  }
+  private void stopthat()
+  {
+    StopAllCoroutines();
+    StartCoroutine(flood_reset());
   }
   public void StartFloodParticle()
   {
@@ -292,12 +305,19 @@ public class MainCamera : MonoBehaviour
   {
     Vector3 _originpos = MyTransform.position;
     Vector3 _offset = Vector3.zero;
+    var _waittime= new WaitForSecondsRealtime(1.0f / Flood_shakecount);
     while (true)
     {
       _offset = new Vector3(UnityEngine.Random.Range(-Flood_shakedeg, Flood_shakedeg), UnityEngine.Random.Range(-Flood_shakedeg, Flood_shakedeg));
       MyTransform.position = _originpos + _offset;
-      yield return new WaitForSecondsRealtime(1.0f / Flood_shakecount);
+      yield return _waittime;
     }
+  }
+  private IEnumerator flood_reset()
+  {
+    MyCamera.orthographicSize = 5.4f;
+    MyTransform.eulerAngles = Vector3.zero;
+    yield return null;
   }
   public void FinishFlood()
   {

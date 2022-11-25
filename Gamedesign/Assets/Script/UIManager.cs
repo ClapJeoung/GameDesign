@@ -18,6 +18,7 @@ public class UIManager : MonoBehaviour
   [SerializeField] private float ShakeDegree = 10.0f;   //텍스트 진동 범위
   private bool IsSoulDead = false;                      //횃불 사망 텍스트 출력중인지
   [SerializeField] private Image Fadeimg = null; //홍수 페이드 아웃에 쓸 이미지
+  [SerializeField] private Image RestartLogo = null;  //재시작 로고
   private void Awake()
   {
     instance = this;
@@ -87,9 +88,9 @@ public class UIManager : MonoBehaviour
     IsSoulDead = false;
     GameManager.Instance.Flooded();
   }
-  public void FadeIn(float fadetime) => StartCoroutine(fade(true, fadetime));
-  public void FadeOut(float fadetime) => StartCoroutine(fade(false, fadetime));
-  private IEnumerator fade(bool isin,float fadetime)
+  public void FadeIn(float fadetime) => StartCoroutine(fade(true, fadetime,false));
+  public void FadeOut(float fadetime,bool isdead) => StartCoroutine(fade(false, fadetime,isdead));
+  private IEnumerator fade(bool isin,float fadetime,bool isdead)
   {
     float _origin = isin ? 1.0f : 0.0f; //페이드인이면   불투명도 1 -> 0
     float _target = isin ? 0.0f : 1.0f; //페이드아웃이면 불투명도 0 -> 1
@@ -107,5 +108,35 @@ public class UIManager : MonoBehaviour
     }
     _color.a = _target;
     Fadeimg.color = _color;
+    if (!isin&&isdead)
+    {
+      StartCoroutine(turnlogo(true));
+    }
   }
+  private IEnumerator turnlogo(bool ison)
+  {
+    float _time = 0.0f, _targettime = 1.0f;
+    float _origin = ison ? 0.0f : 1.0f; //페이드인이면   불투명도 1 -> 0
+    float _target = ison ? 1.0f : 0.0f; //페이드아웃이면 불투명도 0 -> 1
+    float _current = _origin;
+    Color _color = Color.white;
+    _color.a = _origin;
+    while (_time < _targettime)
+    {
+      _current = Mathf.Lerp(_origin, _target, Mathf.Pow(_time / _targettime, 2.0f));
+      _color.a = _current;
+      RestartLogo.color = _color;
+      _time += Time.deltaTime;
+      yield return null;
+    }
+    _color.a = _target;
+    RestartLogo.color = _color;
+    if (!ison)
+    {
+      yield return new WaitForSeconds(0.3f);
+      UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+    }
+  }
+  public void TurnOffRestartLogo() => StartCoroutine(turnlogo(false));
+
 }

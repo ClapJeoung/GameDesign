@@ -44,7 +44,7 @@ public class TutorialManager : MonoBehaviour
     if (!IsTutorial) return;
     Woodens[0].DeActive();
     Woodens[1].DeActive();
-    LampDimension.DeActive();
+  //  LampDimension.DeActive();
     LampEvent.Active();
   }
   public void Camera_start()  //카메라가 튜토리얼 위치로 이동하고 사이즈 확대      튜토리얼 스타트

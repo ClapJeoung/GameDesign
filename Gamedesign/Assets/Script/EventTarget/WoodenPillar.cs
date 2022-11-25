@@ -57,6 +57,7 @@ public class WoodenPillar : MonoBehaviour,Interactable
 
       if ((Progress / RequireTime) >= 1.0f) //Ignite 임계점 넘어서면
       {
+        AudioManager.Instance.PlayFire();
         TargetTorchPos = Vector2.Lerp(CurrentTorchPos, transform.position, 0.5f);  //TargetTorchPos에 값 할당
         SmokeParticle.Stop();                     //검은연기 파티클 종료
         BurningParticle.transform.position = TargetTorchPos + Vector3.back; //불타는 파티클 위치 설정
@@ -102,6 +103,7 @@ public class WoodenPillar : MonoBehaviour,Interactable
     gameObject.layer = LayerMask.NameToLayer("Default");
     yield return new WaitForSeconds(1.5f);
     MyRock.Active();
+    AudioManager.Instance.StopFire(true);
   }
   public void Setup()
   {

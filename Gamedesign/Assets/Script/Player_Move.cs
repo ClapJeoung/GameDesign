@@ -62,7 +62,6 @@ public class Player_Move : MonoBehaviour
   [SerializeField] private ParticleSystem DeadParticle_soul = null; //플레이어 불타는 파티클
   private ParticleSystem.ShapeModule DeadShape_soul;
   [SerializeField] private ParticleSystem WalkParticle = null;  //걷는 먼지 파티클
-  private ParticleSystem.ShapeModule WalkShape;
   [SerializeField] private ParticleSystem JumpParticle = null;  //점프 먼지 파티클
   private ParticleSystem.ShapeModule JumpShape;
   private bool flipx = true;                  //이미지 좌우반전용 변수
@@ -72,6 +71,7 @@ public class Player_Move : MonoBehaviour
   [SerializeField] private Torch MyTorch = null;
   [SerializeField] private GameObject SkullPrefab = null;
   [SerializeField] private Transform SkullHolder = null;
+  [SerializeField] private float WalkingTime = 0.3f;
   public void Setup()
   {
     MyTransform = transform;
@@ -99,12 +99,11 @@ public class Player_Move : MonoBehaviour
     WaterUpShape = WaterUpParticle.shape;
     DeadShape_body = DeadParticle_body.shape;
     DeadShape_soul=DeadParticle_soul.shape;
-    WalkShape= WalkParticle.shape;
     JumpShape= JumpParticle.shape;
     MyBound.Expand(+Expanddegree);
     IsDead = true;
     IsPlaying = false;
-    StartCoroutine(updatewalkparticle());
+    StartCoroutine(walkingeffect());
   }
   public void Start()
   {
@@ -180,6 +179,7 @@ public class Player_Move : MonoBehaviour
     Vector3 _particlepos = new Vector3(0.0f, Vertex_bottom[0].y, 0.0f);
     JumpShape.position = MyTransform.position + _particlepos;
     JumpParticle.Play();
+    AudioManager.Instance.PlayClip(6);
   }
   private void RaycastVertical()  //위아래 검사
   {
@@ -269,6 +269,7 @@ public class Player_Move : MonoBehaviour
       //바로 물에 들어가 있는 속도로 변경
       WaterDownShape.position = MyTransform.position + Vector3.down * 0.5f;
       WaterDownParticle.Play(); //퐁당 파티클 위치 설정하고 실행
+      AudioManager.Instance.PlayClip(12);
     }
     else if (collision.CompareTag("Spike") && IsPlaying) //가시에 닿았으면 육체 죽음
     {
@@ -297,6 +298,7 @@ public class Player_Move : MonoBehaviour
       IsWater = false;
       WaterUpShape.position = MyTransform.position + Vector3.down * 0.5f;
       WaterUpParticle.Play();
+      AudioManager.Instance.PlayClip(12);
     }
   }
   private void Update()
@@ -307,6 +309,35 @@ public class Player_Move : MonoBehaviour
   {
     UpdateMove();
   }
+
+  private IEnumerator walkingeffect()
+  {
+    var _walkcondition=new WaitUntil(() => { return IsPressing&&Jumpable&&!IsDead; });
+    var _waitsecond=new WaitForSeconds(WalkingTime);
+    Vector3 _newpos_x = Vector2.right * Vertex_left[0].x;
+    Vector3 _newpos_y = Vector2.up * Vertex_bottom[0].y;
+    Vector3 _rot_x = Vector3.right * -70.0f;
+    Vector3 _rot_y = Vector3.up * -90.0f;
+    ParticleSystem.ShapeModule _shape = WalkParticle.shape;
+    while (true)
+    {
+  //    Debug.Log($"Ispressing : {IsPressing}  Velocity : {Velocity.y == 0}  !IsDead : {!IsDead}");
+      yield return _walkcondition;
+      setshape();
+      WalkParticle.Play();
+      AudioManager.Instance.PlayWalk();
+      yield return _waitsecond;
+      yield return null;
+    }
+
+    void setshape()
+    {
+      _shape.position = MyTransform.position + _newpos_y + _newpos_x * (flipx ? -1 : 1);
+      _shape.rotation = _rot_x + _rot_y * (flipx ? -1 : 1);
+    }
+  }
+
+  #region  사망
   public void Dead_body(Vector2 bloodpos,bool isrock)         //가시에 찔려서 육체적 사망
   {
     StartCoroutine(dead_body(bloodpos, isrock));
@@ -412,6 +443,9 @@ public class Player_Move : MonoBehaviour
     IsWater = false;
     IsPlaying = true;
   }
+  #endregion
+
+  #region 엔딩
   public void EndingEngage()
   {
     IsDead = true;
@@ -433,17 +467,5 @@ public class Player_Move : MonoBehaviour
       yield return null;
     }
   }
-  private IEnumerator updatewalkparticle()
-  {
-    Vector3 _newpos_x = Vector2.right * Vertex_left[0].x;
-    Vector3 _newpos_y = Vector2.up * Vertex_bottom[0].y;
-    Vector3 _rot_x = Vector3.right * -70.0f;
-    Vector3 _rot_y = Vector3.up * -90.0f;
-    while (true)
-    {
-      WalkShape.position = MyTransform.position + _newpos_y + _newpos_x * (flipx?-1:1);
-      WalkShape.rotation=_rot_x+ _rot_y * (flipx ? -1 : 1);
-      yield return null;
-    }
-  }
+  #endregion
 }

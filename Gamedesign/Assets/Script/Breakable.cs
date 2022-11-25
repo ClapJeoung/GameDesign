@@ -17,7 +17,6 @@ public class Breakable : MonoBehaviour
   public void Pressed() //밟혔을때
   {
     if (IsActive) return;
-    Debug.Log("Pressed");
     DustParticle.Play();
     IsActive = true;
     StartCoroutine(DestroyCoroutine());
@@ -30,6 +29,7 @@ public class Breakable : MonoBehaviour
     gameObject.layer = LayerMask.NameToLayer("Default");//기본 레이어로 전환
     DestroyParticle.Play(); //파괴 파티클 실행
     float _time = 0.0f;
+    AudioManager.Instance.PlayClip(10);
     while (_time < DestroyTime)
     {
       MyAlpha.a = 1 - _time / DestroyTime;  //알파값이 1~0로

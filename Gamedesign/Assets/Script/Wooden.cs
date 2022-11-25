@@ -93,6 +93,7 @@ public class Wooden : MonoBehaviour,Interactable,Lightobj
         BurningParticle.transform.position = TargetTorchPos + Vector3.back; //불타는 파티클 위치 설정
         BurningParticle.Play();                   //불타는 파티클 실행
         MyLight.transform.position = TargetTorchPos;
+        AudioManager.Instance.PlayFire();
       }
 
      return;
@@ -135,7 +136,7 @@ public class Wooden : MonoBehaviour,Interactable,Lightobj
       MyLight.pointLightOuterRadius = Mathf.Lerp(MaxLightOuter, 0.0f, _time / _firetime);
       yield return null;
     }
-
+    AudioManager.Instance.StopFire(true);
   }
   public void Setup()
   {
