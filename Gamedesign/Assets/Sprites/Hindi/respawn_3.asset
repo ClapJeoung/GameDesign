@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58d256cc8209a4643b54d97ad0ef3dd2, type: 3}
+  m_Name: respawn_3
+  m_EditorClassIdentifier: 
+  Length: 1148
+  Sprites:
+  - {fileID: -629161453, guid: 98139cb2d3eaa2e4d9214d94fc556597, type: 3}
+  - {fileID: 1343440411, guid: 98139cb2d3eaa2e4d9214d94fc556597, type: 3}
+  - {fileID: 1127384155, guid: 98139cb2d3eaa2e4d9214d94fc556597, type: 3}
+  - {fileID: -2031629403, guid: 98139cb2d3eaa2e4d9214d94fc556597, type: 3}
+  - {fileID: -1838663118, guid: 98139cb2d3eaa2e4d9214d94fc556597, type: 3}

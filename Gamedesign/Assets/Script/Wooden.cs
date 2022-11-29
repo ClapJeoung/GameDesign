@@ -151,7 +151,7 @@ public class Wooden : MonoBehaviour,Interactable,Lightobj
     else if(MyDimension== Dimension.B) Spr_A.enabled = false;
     OriginDimension = MyDimension;
     GameManager.Instance.AllLights.Add(this);
-    float _min = 15.0f, _max = 40.0f,_minsize=1.0f,_maxsize=10.0f,_size= Spr_A.size.x* Spr_A.size.y;
+    float _min =30.0f, _max = 80.0f,_minsize=1.0f,_maxsize=10.0f,_size= Spr_A.size.x* Spr_A.size.y;
     ParticleSystem.EmissionModule _emi = FiredParticle.emission;
     _emi.rateOverTime = Mathf.Lerp(_min, _max,  _size/ _maxsize);
   }

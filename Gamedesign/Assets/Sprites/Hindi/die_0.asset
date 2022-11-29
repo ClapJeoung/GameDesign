@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58d256cc8209a4643b54d97ad0ef3dd2, type: 3}
+  m_Name: die_0
+  m_EditorClassIdentifier: 
+  Length: 1038
+  Sprites:
+  - {fileID: 2106290559, guid: e1bf8676a0e10874a8a0ccd8ddf3c388, type: 3}
+  - {fileID: 214580759, guid: e1bf8676a0e10874a8a0ccd8ddf3c388, type: 3}
+  - {fileID: 2139022521, guid: e1bf8676a0e10874a8a0ccd8ddf3c388, type: 3}
+  - {fileID: -340241198, guid: e1bf8676a0e10874a8a0ccd8ddf3c388, type: 3}

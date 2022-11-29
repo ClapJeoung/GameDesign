@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d4b068665699f54c876f8686fbaa3ac, type: 3}
+  m_Name: SDModule
+  m_EditorClassIdentifier: 
+  RisingTime: 0.8
+  RisingDistance: 1.5
+  ShakeWaittime: 0.3
+  Text_Waittime: 1
+  Text_AppearingTime: 2.5
+  Text_ShakeCount: 8
+  Text_ShakeDeg: 3
+  Text_DestroyWaittime: 4
+  Particle_minspeed: 8.5
+  Particle_maxspeed: 8.5
+  Particle_mincount: 5
+  Particle_maxcount: 45
+  Gain_mincount: 10
+  Gain_maxcount: 30
+  Flood_originpos: -12
+  Flood_targetpos: 0.5
+  Flood_time: 7.5
+  Flood_shakedeg: 0.15
+  Flood_shakecount: 15
+  Flood_angle: -8
+  Flood_FadeOutTime: 8

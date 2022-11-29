@@ -50,6 +50,7 @@ public class Player_Move : MonoBehaviour
   [SerializeField] private int Dead_ShakeCount = 55;        //사망 시 흔들리는 횟수
   [SerializeField] private float Dead_ShakeTime = 4.0f;     //사망 시 흔들리는 시간
   [SerializeField] private float Dead_ShakeDegree = 0.05f;  //사망 시 흔들리는 정도
+  [SerializeField] private SouldeathModule SDModule = null; //영혼사망 각종 데이터
   [SerializeField] private SpriteRenderer MySpr = null;     //내 스프라이트랜더러
   [SerializeField] private Animator MyAnimator = null;      //내 애니메이터
   [Space(5)]
@@ -61,6 +62,9 @@ public class Player_Move : MonoBehaviour
   private ParticleSystem.ShapeModule DeadShape_body;
   [SerializeField] private ParticleSystem DeadParticle_soul = null; //플레이어 불타는 파티클
   private ParticleSystem.ShapeModule DeadShape_soul;
+  [SerializeField] private ParticleSystem DeadParticle_RealSoul = null; //플레이어 영혼죽음
+  [SerializeField] private ParticleSystem DeadParticle_Readsoul_gain = null;  //불 모이는거
+  [SerializeField] private ParticleSystem DeadParticle_bomb = null;             //폭발
   [SerializeField] private ParticleSystem WalkParticle = null;  //걷는 먼지 파티클
   [SerializeField] private ParticleSystem JumpParticle = null;  //점프 먼지 파티클
   private ParticleSystem.ShapeModule JumpShape;
@@ -72,6 +76,7 @@ public class Player_Move : MonoBehaviour
   [SerializeField] private GameObject SkullPrefab = null;
   [SerializeField] private Transform SkullHolder = null;
   [SerializeField] private float WalkingTime = 0.3f;
+  [SerializeField] private Tutorialstone_jump TSJ=null;
   public void Setup()
   {
     MyTransform = transform;
@@ -173,6 +178,7 @@ public class Player_Move : MonoBehaviour
   }
   private void Jump()
   {
+    TSJ.Twinkle();
     NextVelocity = new Vector2(NextVelocity.x, JumpPower); 
     JumpTime += Time.deltaTime; 
     MyAnimator.SetTrigger("Jump");
@@ -262,7 +268,7 @@ public class Player_Move : MonoBehaviour
   }
   private void OnTriggerEnter2D(Collider2D collision)
   {
-    if (IsDead) return;
+    if (IsDead||BodyDied) return;
     if (collision.gameObject.layer ==  LayerMask.NameToLayer("Water") && IsPlaying)  //물에 닿았으면
     {
       NextVelocity = new Vector2(NextVelocity.x, 0.0f); IsWater = true; WaterAccel = 180.0f; Jumpable = true;
@@ -289,6 +295,7 @@ public class Player_Move : MonoBehaviour
   }
   public void RollingStones()
   {
+    if (BodyDied) return;
     Dead_body(Vector2.up * -GetComponent<BoxCollider2D>().bounds.size.y / 2, true);
   }
   private void OnTriggerExit2D(Collider2D collision)
@@ -338,12 +345,14 @@ public class Player_Move : MonoBehaviour
   }
 
   #region  사망
+  private bool BodyDied = false;
   public void Dead_body(Vector2 bloodpos,bool isrock)         //가시에 찔려서 육체적 사망
   {
     StartCoroutine(dead_body(bloodpos, isrock));
   }
   private IEnumerator dead_body(Vector2 bloodpos,bool isrock)
   {
+    BodyDied = true;
     AudioManager.Instance.PlayClip(2);
     IsPlaying = false;
     Velocity = Vector2.zero;
@@ -366,6 +375,8 @@ public class Player_Move : MonoBehaviour
 
     yield return new WaitForSeconds(1.5f);  //피 튀기는 연출 끝내고
 
+    GameManager.Instance.RespawnHindi();
+
     if (!isrock)  //가시 찔린거면 사망 연출 필요하니까 
     {
       Vector3 _originpos = MyTransform.position;
@@ -383,7 +394,6 @@ public class Player_Move : MonoBehaviour
     else { MyTransform.localScale = Vector3.zero; 
       Instantiate(SkullPrefab, SkullHolder).GetComponent<Skull>().Setup(MyTransform.position , 2); }
     //바위에 깔린거면 흔적도 남지 않고 안보이게
-
       GameManager.Instance.Dead_body(); //현재 차원 및 오브젝트 초기화
     GameManager.Instance.PlayRPParticle();  //화면 회전하는 파티클
 
@@ -402,25 +412,56 @@ public class Player_Move : MonoBehaviour
     IsDead = true;
     IsPlaying = false;
     IsWater = false;
-
-    yield return new WaitForSeconds(1.0f);  //연기까지 다 사라지는 시간(대충)
-
-    Vector3 _originpos = MyTransform.position;  //Dead_ShakeTime동안 진동
-    for(int i = 0; i < Dead_ShakeCount; i++)
+    yield return new WaitForSeconds(1.0f);
+    StartCoroutine(rising());
+    yield return new WaitForSeconds(SDModule.RisingTime);
+    GameManager.Instance.Dead_soul_1();
+    StartCoroutine(shake());
+    StartCoroutine(souldeadparticle());
+    yield return new WaitForSeconds(SDModule.Text_Waittime + SDModule.Text_AppearingTime + SDModule.Text_DestroyWaittime - SDModule.RisingTime);
+    MyTransform.localScale = Vector3.zero;    //플레이어의 크기는 0이 되어 시야에서 사라짐
+    DeadParticle_bomb.Play();
+    //   GameManager.Instance.Dead_soul_1();         //주위가 정지하고 사망 텍스트 출력 시작
+    yield return null;
+  }
+  private IEnumerator rising()
+  {
+    float _time = 0.0f;
+    while (_time < SDModule.RisingTime)
     {
-      MyTransform.position = _originpos + new Vector3 (Random.Range(-Dead_ShakeDegree, Dead_ShakeDegree), Random.Range(-Dead_ShakeDegree, Dead_ShakeDegree))+Vector3.back*2;
+      MyTransform.Translate(Vector3.up * Time.deltaTime * SDModule.RisingDistance / SDModule.RisingTime);
+      _time += Time.deltaTime;yield return null;
+    }
+  }
+  private IEnumerator shake()
+  {
+    Vector3 _originpos = MyTransform.position;  //Dead_ShakeTime동안 진동
+    for (int i = 0; i < Dead_ShakeCount; i++)
+    {
+      MyTransform.position = _originpos + new Vector3(Random.Range(-Dead_ShakeDegree, Dead_ShakeDegree), Random.Range(-Dead_ShakeDegree, Dead_ShakeDegree)) + Vector3.back * 2;
       yield return new WaitForSeconds(Dead_ShakeTime / Dead_ShakeCount);
     }
-    MyTransform.position = _originpos;        //진동이 종료되면
-    MyTransform.localScale = Vector3.zero;    //플레이어의 크기는 0이 되어 시야에서 사라짐
-
-    DeadShape_soul.position = MyTransform.position;  //사망 파티클 위치 조정하고
-    DeadParticle_soul.Play();                        //사망 파티클 실행
-
-    yield return new WaitForSeconds(1.0f);      //사망 파티클 사라질때까지 잠시 대기
-
-    GameManager.Instance.Dead_soul_1();         //주위가 정지하고 사망 텍스트 출력 시작
-    yield return null;
+  }
+  private IEnumerator souldeadparticle()
+  {
+    float _time = 0.0f,_targettime= SDModule.Text_Waittime + SDModule.Text_AppearingTime + SDModule.Text_DestroyWaittime - SDModule.RisingTime-0.75f;
+    DeadParticle_RealSoul.transform.position = new Vector3(MyTransform.position.x, MyTransform.position.y, DeadParticle_RealSoul.transform.position.z-2.0f);
+    DeadParticle_Readsoul_gain.transform.position = MyTransform.position + Vector3.back;
+    var soulemission = DeadParticle_RealSoul.emission;
+    var soulmain = DeadParticle_RealSoul.main;
+    var gainemission = DeadParticle_Readsoul_gain.emission;
+    DeadParticle_bomb.transform.position= MyTransform.position + Vector3.back;
+    DeadParticle_RealSoul.Play();
+    DeadParticle_Readsoul_gain.Play();
+    while(_time< _targettime)
+    {
+      soulmain.startSpeed = Mathf.Lerp(SDModule.Particle_minspeed, SDModule.Particle_maxspeed, _time / _targettime);
+      soulemission.rateOverTime=Mathf.Lerp(SDModule.Particle_mincount, SDModule.Particle_maxcount, _time/_targettime);
+      gainemission.rateOverTime=Mathf.Lerp(SDModule.Gain_mincount, SDModule.Gain_maxcount, _time/_targettime);
+      _time += Time.deltaTime;yield return null;
+    }
+    DeadParticle_RealSoul.Stop();
+    DeadParticle_Readsoul_gain.Stop();
   }
   public void Respawn(Vector2 newpos,float targetx) //리스폰
   {
@@ -442,6 +483,7 @@ public class Player_Move : MonoBehaviour
     Debug.Log("새로운 시작인 레후~");
     IsWater = false;
     IsPlaying = true;
+    BodyDied = false;
   }
   #endregion
 

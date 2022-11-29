@@ -29,14 +29,8 @@ public class MainCamera : MonoBehaviour
   [SerializeField] private ParticleSystem Particle_soul = null; //영혼계 환경 파티클
   private ParticleSystem.ShapeModule particle_soul_shape;
   [Space(5)]
+  [SerializeField] private SouldeathModule SDModule = null; //영혼사망 각종 데이터
   [SerializeField] private Transform FloodTrans = null; //카메라 잠길 홍수 트랜스폼
-  [SerializeField] private float Flood_originpos = -12.0f;//홍수 시작 위치
-  [SerializeField] private float Flood_targetpos = 0.5f;  //홍수 종료 위치
-  [SerializeField] private float Flood_time = 5.0f;       //카메라가 다 잠기는 시간
-  [SerializeField] private float Flood_shakedeg = 0.8f;   //카메라 진동 정도
-  [SerializeField] private int Flood_shakecount = 8;      //초당 카메라 진동 횟수
-  [SerializeField] private float Flood_angle = 15.0f;     //카메라 회전 크기
-  [SerializeField] private float Flood_FadeOutTime = 7.0f;  //카메라 페이드아웃하는 시간
   [SerializeField] private ParticleSystem Flood_dustparticle = null;  //먼지 파티클
   [SerializeField] private ParticleSystem Flood_stoneparticle = null; //낙석 파티클
   private bool IsFlooded = false;                                     //침수 완료됐나요
@@ -47,6 +41,7 @@ public class MainCamera : MonoBehaviour
   {
     get { return MyCamera.orthographicSize / OriginSize; }
   }
+  [SerializeField] private SDEffect MySDE = null;
   private void Setup()
   {
     MyTransform = transform;
@@ -102,11 +97,11 @@ public class MainCamera : MonoBehaviour
   {
     Vector3 _originpos = MyTransform.position;
     Vector3 _offset = Vector3.zero;
-    var _wait= new WaitForSeconds(1.0f / Flood_shakecount);
+    var _wait= new WaitForSeconds(1.0f / SDModule.Flood_shakecount);
     while (true)
     {
       _originpos = MyTransform.position;
-      _offset = new Vector3(UnityEngine.Random.Range(-Flood_shakedeg, Flood_shakedeg), UnityEngine.Random.Range(-Flood_shakedeg, Flood_shakedeg));
+      _offset = new Vector3(UnityEngine.Random.Range(-SDModule.Flood_shakedeg, SDModule.Flood_shakedeg), UnityEngine.Random.Range(-SDModule.Flood_shakedeg, SDModule.Flood_shakedeg));
       MyTransform.position = _originpos + _offset;
       yield return _wait;
     }
@@ -251,14 +246,14 @@ public class MainCamera : MonoBehaviour
   #endregion
 
   #region 횃불 사망 홍수
-  public void StartFlood()
+  public void StartFlooda()
   {
     FloodTrans.GetComponent<SpriteRenderer>().enabled = true;
     IsDead = true;
     StartCoroutine(flood_move());
     StartCoroutine(flood_angle());
-    UIManager.Instance.FadeOut(Flood_FadeOutTime,true);
-    Invoke("stopthat", Flood_FadeOutTime + 1.0f);
+ //   UIManager.Instance.FadeOut(SDModule.Flood_FadeOutTime,true);
+    Invoke("stopthat", SDModule.Flood_FadeOutTime + 1.0f);
   }
   private void stopthat()
   {
@@ -279,13 +274,12 @@ public class MainCamera : MonoBehaviour
   {
     float _time = 0.0f;
     Vector3 _originpos = MyTransform.position + Vector3.forward * 3.0f;
-    while (_time < Flood_time)
+    while (_time < SDModule.Flood_time)
     {
-      FloodTrans.position = _originpos + Vector3.up * Mathf.Lerp(Flood_originpos, Flood_targetpos, _time / Flood_time);
+      FloodTrans.position = _originpos + Vector3.up * Mathf.Lerp(SDModule.Flood_originpos, SDModule.Flood_targetpos, _time / SDModule.Flood_time);
       _time += Time.deltaTime;
       yield return null;
     }
-    yield return new WaitForSeconds(Flood_FadeOutTime - Flood_FadeOutTime);
     IsFlooded = true;
     Flood_dustparticle.Stop();
     Flood_stoneparticle.Stop();
@@ -293,10 +287,10 @@ public class MainCamera : MonoBehaviour
   private IEnumerator flood_angle() //홍수 날때 카메라 회전
   {
     float _time = 0.0f;
-    while (_time < Flood_time)
+    while (_time < SDModule.Flood_time)
     {
-      MyTransform.eulerAngles = Vector3.forward * Mathf.Lerp(0.0f, Flood_angle,_time/Flood_time);
-      FloodTrans.eulerAngles = Vector3.forward * Mathf.Lerp(0.0f, Flood_angle/5.0f, _time / Flood_time);
+      MyTransform.eulerAngles = Vector3.forward * Mathf.Lerp(0.0f, SDModule.Flood_angle,_time/ SDModule.Flood_time);
+      FloodTrans.eulerAngles = Vector3.forward * Mathf.Lerp(0.0f, SDModule.Flood_angle / 5.0f, _time / SDModule.Flood_time);
       _time += Time.deltaTime;
       yield return null;
     }
@@ -305,11 +299,29 @@ public class MainCamera : MonoBehaviour
   {
     Vector3 _originpos = MyTransform.position;
     Vector3 _offset = Vector3.zero;
-    var _waittime= new WaitForSecondsRealtime(1.0f / Flood_shakecount);
+    Transform[] _idles = new Transform[MySDE.Count];
+    Transform[] _deletes = new Transform[MySDE.Count];
+    Transform[] _lights=new Transform[MySDE.Count];
+    Vector3[] _idles_origin=new Vector3[MySDE.Count];
+    Vector3[] _deletes_origin=new Vector3[MySDE.Count];
+    Vector3[] _lights_origin=new Vector3[MySDE.Count];
+    for(int i=0;i<MySDE.Count; i++)
+    {
+      _idles[i] = MySDE.Particles_Idle[i].transform;_deletes[i] = MySDE.Particle_Delete[i].transform;
+      _idles_origin[i] = _idles[i].position; _deletes_origin[i] = _deletes[i].position;
+      _lights[i]=MySDE.Lights[i].transform; _lights_origin[i] = _lights[i].position;
+    }
+    var _waittime= new WaitForSecondsRealtime(1.0f / SDModule.Flood_shakecount);
     while (true)
     {
-      _offset = new Vector3(UnityEngine.Random.Range(-Flood_shakedeg, Flood_shakedeg), UnityEngine.Random.Range(-Flood_shakedeg, Flood_shakedeg));
+      _offset = new Vector3(UnityEngine.Random.Range(-SDModule.Flood_shakedeg, SDModule.Flood_shakedeg), UnityEngine.Random.Range(-SDModule.Flood_shakedeg, SDModule.Flood_shakedeg));
       MyTransform.position = _originpos + _offset;
+   /*   for(int i = 0; i < MySDE.Count; i++)
+      {
+        _idles[i].position = _idles_origin[i] + _offset;
+        _deletes[i].position = _deletes_origin[i] + _offset;
+        _lights[i].position= _lights_origin[i] + _offset;
+      }   */
       yield return _waittime;
     }
   }

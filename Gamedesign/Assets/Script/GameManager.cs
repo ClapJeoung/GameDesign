@@ -29,8 +29,7 @@ public class GameManager : MonoBehaviour
   public List<Lightobj> AllLights = new List<Lightobj>();
   public void TurnOffLights() { foreach (var lights in AllLights) lights.TurnOff(); }   //모든 불 끄기(카메라 불 빼고)
   [SerializeField] private Transform SkullHolder = null;
-  [SerializeField] private float TimeSlowTime = 4.5f;
-  [SerializeField] private float TimeRecoveryTime = 1.5f;
+  [SerializeField] private SouldeathModule SDModule = null;
   public void SetSC(ref StageCollider newsc)
   {
     newsc.CurrentDimension=CurrentSC.CurrentDimension;
@@ -55,21 +54,8 @@ public class GameManager : MonoBehaviour
   public void SetNewRespawn(RespawnObj newrespawn) => CurrentRespawn = newrespawn;
   public void Flooded() //게임오버 홍수 시작
   {
-    StartCoroutine(recoverytime());
-    MyCamera.StartFlood();
- //   foreach (var stages in AllStages) stages.ResetStage();  //스테이지 전체 초기화
+    MyCamera.StartFlooda();
     foreach (var lights in AllLights) lights.TurnOff();     //모든 불 끄기(카메라 불 빼고)
-  }
-  private IEnumerator recoverytime()  //시간 속도 복구
-  {
-      float _time = 0.0f;
-      while (_time < TimeRecoveryTime)
-      {
-        _time += Time.unscaledDeltaTime;
-        Time.timeScale =  _time / TimeRecoveryTime;
-        yield return null;
-      }
-      Time.timeScale = 1.0f;
   }
   public void StartTutorial()       //홍수나고 페이드아웃 다음에 호출되는 튜토리얼 시작 함수
   {
@@ -88,7 +74,7 @@ public class GameManager : MonoBehaviour
     MyTorchPivot.FinishTutorial();
     Respawn();
   }
-  public void Dead_body()  //플레이어 사망 즉시 호출
+  public void Dead_body()  //플레이어 사망 연출 끝나고 호출
   {
     if (CurrentSC.CurrentDimension != CurrentSC.DefaultDimension)
     {
@@ -98,31 +84,28 @@ public class GameManager : MonoBehaviour
     MyTorchPivot.Dead();
     CurrentSC.ResetStage(); //현재 스테이지만 초기화
   }
+  public void RespawnHindi()
+  {
+    int _random = Random.Range(0, RestartHindies.Length);
+    UIManager.Instance.RespawnHindi(RestartHindies[_random].Sprites, RestartHindies[_random].Length);
+  }
   public void Dead_soul_0()   //횃불 사망 직후 호출
   {
     MyTorchPivot.Dead();  //횃불 멈추고
     MyTorch.Dead();       //횃불 멈추고
+    Invoke("Flooded",SDModule.RisingTime+ SDModule.Text_Waittime + SDModule.Text_AppearingTime + 3.0f);
+    CurrentSC.StopAllPots();
+    Invoke("_asdf", SDModule.RisingTime);
+  }
+  private void _asdf()
+  {
+    int _random = Random.Range(0, DeadHindies.Length);
+    UIManager.Instance.OutputHindi(DeadHindies[_random].Sprites, DeadHindies[_random].Length);  //텍스트 출력 시작
   }
   public void Dead_soul_1() //플레이어 사망 연출 이후 호출
   {
     MyCamera.StartFloodParticle();
-    CurrentSC.StopAllPots();
-    StartCoroutine(slowtime());                              //주위 정지
-    int _random = Random.Range(0, DeadHindies.Length);
-    UIManager.Instance.OutputHindi(DeadHindies[_random].Sprites, DeadHindies[_random].Length);  //텍스트 출력 시작
     AudioManager.Instance.PlayClip(13);
-  }
-  private IEnumerator slowtime()  //시간 정지
-  {
-    float _time = 0.0f;
-    while(_time< TimeSlowTime)
-    {
-      _time += Time.unscaledDeltaTime;
-      if (1 - _time / TimeSlowTime < 0) break;
-      Time.timeScale = 1 - _time / TimeSlowTime;
-      yield return null;
-    }
-    Time.timeScale = 0.0f;
   }
   public void Respawn() //플레이어 사망 애니메이션 끝나고 호출
   {

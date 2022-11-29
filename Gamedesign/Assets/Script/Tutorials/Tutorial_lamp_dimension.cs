@@ -61,7 +61,7 @@ public class Tutorial_lamp_dimension : MonoBehaviour,Interactable
 
         if (MyManager.TutorialDimension == Dimension.A)
         { GameManager.Instance.OpenMask(transform.position); MySpr.sprite = Spr_soul; MyManager.TutorialDimension = Dimension.B;
-        MyManager.SetStone();
+      //  MyManager.SetStone();
       }       //튜토리얼 전용 이펙트를 만들어야하나
         else { GameManager.Instance.CloseMask(transform.position); MySpr.sprite = Spr_world; MyManager.TutorialDimension = Dimension.A; }
         Progress = 0.0f;
