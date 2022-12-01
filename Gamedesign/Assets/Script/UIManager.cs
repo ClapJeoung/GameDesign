@@ -65,10 +65,10 @@ public class UIManager : MonoBehaviour
       }
       else TextImages[i].transform.SetParent(TextImages_disable);
     }
-    StartCoroutine(drawtext_respawn(TextCount));
+    StartCoroutine(drawtext_respawn(TextCount,new Vector2(length,_maxy)*_sizeoffset, new Vector3(960.0f, 540.0f + 287.0165f)));
     Invoke("_asdf", 3.0f);
   }
-  private IEnumerator drawtext_respawn(int textcount)
+  private IEnumerator drawtext_respawn(int textcount,Vector2 _lscale,Vector2 _lpos)
   {
     Vector2[] _pos = new Vector2[TextCount];
     Vector2[] _scale = new Vector2[TextCount];
@@ -78,7 +78,7 @@ public class UIManager : MonoBehaviour
       _scale[i] = TextImages[i].rectTransform.sizeDelta;
       _pos[i] = TextImages[i].transform.position;
     }
-    MySDE.SetPosition(_pos, _scale);
+    MySDE.SetPosition(_pos, _scale,_lscale,_lpos);
     yield return new WaitForSeconds(0.5f);
     for (int i = 0; i < textcount; i++)
     {
@@ -133,10 +133,10 @@ public class UIManager : MonoBehaviour
     {
       StartCoroutine(shaketext(TextImages[i].rectTransform));
     }
-    StartCoroutine(drawtext(TextCount));
+    StartCoroutine(drawtext(TextCount, new Vector2(length, _maxy) * _sizeoffset, new Vector3(960.0f,540.0f+ 287.0165f)));
     Invoke("FinishText", SDModule.Text_Waittime + SDModule.Text_AppearingTime + SDModule.Text_DestroyWaittime);
   }
-  private IEnumerator drawtext(int textcount)
+  private IEnumerator drawtext(int textcount, Vector2 _lscale, Vector2 _lpos)
   {
     Vector2[] _pos = new Vector2[TextCount];
     Vector2[] _scale = new Vector2[TextCount];
@@ -146,7 +146,7 @@ public class UIManager : MonoBehaviour
       _scale[i] = TextImages[i].rectTransform.sizeDelta;
       _pos[i] = TextImages[i].transform.position;
     }
-    MySDE.SetPosition(_pos, _scale);
+    MySDE.SetPosition(_pos, _scale, _lscale, _lpos);
     yield return new WaitForSeconds(SDModule.Text_Waittime);
     for(int i = 0; i < textcount; i++)
     {
@@ -157,6 +157,7 @@ public class UIManager : MonoBehaviour
   }
   private IEnumerator alphatext(int num, float targetalpha)
   {
+    if (targetalpha > 0) MySDE.TurnOn(num);
     float _time = 0.0f, _targettime = 0.2f;
     float _origin = TextImages[num].color.a;
     Color _col = Color.white; _col.a = _origin;
@@ -168,7 +169,6 @@ public class UIManager : MonoBehaviour
       _time += Time.deltaTime; yield return null;
     }
     _col.a = targetalpha; TextImages[num].color = _col;
-   if(targetalpha>0) MySDE.TurnOn(num);
   }
   private IEnumerator shaketext(RectTransform _rect)
   {

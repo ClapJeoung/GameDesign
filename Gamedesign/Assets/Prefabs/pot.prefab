@@ -1421,8 +1421,8 @@ ParticleSystem:
         m_NumAlphaKeys: 2
   UVModule:
     serializedVersion: 2
-    enabled: 0
-    mode: 0
+    enabled: 1
+    mode: 1
     timeMode: 0
     fps: 30
     frameOverTime:
@@ -1540,7 +1540,9 @@ ParticleSystem:
     uvChannelMask: -1
     rowMode: 1
     sprites:
-    - sprite: {fileID: 0}
+    - sprite: {fileID: 1986707106, guid: 6ff0dec9842f26f4498d1016c4d56e2d, type: 3}
+    - sprite: {fileID: -1245373471, guid: 6ff0dec9842f26f4498d1016c4d56e2d, type: 3}
+    - sprite: {fileID: -1315955051, guid: 6ff0dec9842f26f4498d1016c4d56e2d, type: 3}
     flipU: 0
     flipV: 0
   VelocityModule:
@@ -4984,6 +4986,7 @@ MonoBehaviour:
   AllwaysActive: 1
   FirstWaitTime: 2
   WaitTime: 4
+  MyId: 0
 --- !u!1 &4456406610928363934
 GameObject:
   m_ObjectHideFlags: 0
@@ -6725,8 +6728,8 @@ ParticleSystem:
         m_NumAlphaKeys: 2
   UVModule:
     serializedVersion: 2
-    enabled: 0
-    mode: 0
+    enabled: 1
+    mode: 1
     timeMode: 0
     fps: 30
     frameOverTime:
@@ -6844,7 +6847,9 @@ ParticleSystem:
     uvChannelMask: -1
     rowMode: 1
     sprites:
-    - sprite: {fileID: 0}
+    - sprite: {fileID: 1986707106, guid: 6ff0dec9842f26f4498d1016c4d56e2d, type: 3}
+    - sprite: {fileID: -1245373471, guid: 6ff0dec9842f26f4498d1016c4d56e2d, type: 3}
+    - sprite: {fileID: -1315955051, guid: 6ff0dec9842f26f4498d1016c4d56e2d, type: 3}
     flipU: 0
     flipV: 0
   VelocityModule:
@@ -10610,7 +10615,7 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 1.37
+      scalar: 0.99
       minScalar: 5
       maxCurve:
         serializedVersion: 2
@@ -10779,7 +10784,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.1
+      scalar: 0.2
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -11857,8 +11862,8 @@ ParticleSystem:
         m_NumAlphaKeys: 2
   UVModule:
     serializedVersion: 2
-    enabled: 0
-    mode: 0
+    enabled: 1
+    mode: 1
     timeMode: 0
     fps: 30
     frameOverTime:
@@ -11976,7 +11981,9 @@ ParticleSystem:
     uvChannelMask: -1
     rowMode: 1
     sprites:
-    - sprite: {fileID: 0}
+    - sprite: {fileID: 1986707106, guid: 6ff0dec9842f26f4498d1016c4d56e2d, type: 3}
+    - sprite: {fileID: -1245373471, guid: 6ff0dec9842f26f4498d1016c4d56e2d, type: 3}
+    - sprite: {fileID: -1315955051, guid: 6ff0dec9842f26f4498d1016c4d56e2d, type: 3}
     flipU: 0
     flipV: 0
   VelocityModule:
@@ -16727,8 +16734,8 @@ ParticleSystem:
         m_NumAlphaKeys: 2
   UVModule:
     serializedVersion: 2
-    enabled: 0
-    mode: 0
+    enabled: 1
+    mode: 1
     timeMode: 0
     fps: 30
     frameOverTime:
@@ -16846,7 +16853,9 @@ ParticleSystem:
     uvChannelMask: -1
     rowMode: 1
     sprites:
-    - sprite: {fileID: 0}
+    - sprite: {fileID: 1986707106, guid: 6ff0dec9842f26f4498d1016c4d56e2d, type: 3}
+    - sprite: {fileID: -1245373471, guid: 6ff0dec9842f26f4498d1016c4d56e2d, type: 3}
+    - sprite: {fileID: -1315955051, guid: 6ff0dec9842f26f4498d1016c4d56e2d, type: 3}
     flipU: 0
     flipV: 0
   VelocityModule:
@@ -21757,8 +21766,8 @@ ParticleSystem:
         m_NumAlphaKeys: 2
   UVModule:
     serializedVersion: 2
-    enabled: 0
-    mode: 0
+    enabled: 1
+    mode: 1
     timeMode: 0
     fps: 30
     frameOverTime:
@@ -21876,7 +21885,9 @@ ParticleSystem:
     uvChannelMask: -1
     rowMode: 1
     sprites:
-    - sprite: {fileID: 0}
+    - sprite: {fileID: 1986707106, guid: 6ff0dec9842f26f4498d1016c4d56e2d, type: 3}
+    - sprite: {fileID: -1245373471, guid: 6ff0dec9842f26f4498d1016c4d56e2d, type: 3}
+    - sprite: {fileID: -1315955051, guid: 6ff0dec9842f26f4498d1016c4d56e2d, type: 3}
     flipU: 0
     flipV: 0
   VelocityModule:
@@ -26627,8 +26638,8 @@ ParticleSystem:
         m_NumAlphaKeys: 2
   UVModule:
     serializedVersion: 2
-    enabled: 0
-    mode: 0
+    enabled: 1
+    mode: 1
     timeMode: 0
     fps: 30
     frameOverTime:
@@ -26746,7 +26757,9 @@ ParticleSystem:
     uvChannelMask: -1
     rowMode: 1
     sprites:
-    - sprite: {fileID: 0}
+    - sprite: {fileID: 1986707106, guid: 6ff0dec9842f26f4498d1016c4d56e2d, type: 3}
+    - sprite: {fileID: -1245373471, guid: 6ff0dec9842f26f4498d1016c4d56e2d, type: 3}
+    - sprite: {fileID: -1315955051, guid: 6ff0dec9842f26f4498d1016c4d56e2d, type: 3}
     flipU: 0
     flipV: 0
   VelocityModule:

@@ -26,6 +26,7 @@ public class Tutorialstone_jump : MonoBehaviour
     ActiveSpr.color = _col;
     MyLight.intensity = 1.0f;
     StartCoroutine(dying());
+    MyParticle.Play();
   }
   private IEnumerator dying()
   {

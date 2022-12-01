@@ -301,15 +301,15 @@ public class MainCamera : MonoBehaviour
     Vector3 _offset = Vector3.zero;
     Transform[] _idles = new Transform[MySDE.Count];
     Transform[] _deletes = new Transform[MySDE.Count];
-    Transform[] _lights=new Transform[MySDE.Count];
+    Transform _light = null;
     Vector3[] _idles_origin=new Vector3[MySDE.Count];
     Vector3[] _deletes_origin=new Vector3[MySDE.Count];
-    Vector3[] _lights_origin=new Vector3[MySDE.Count];
+    Vector3 _lights_origin = Vector3.zero;
     for(int i=0;i<MySDE.Count; i++)
     {
       _idles[i] = MySDE.Particles_Idle[i].transform;_deletes[i] = MySDE.Particle_Delete[i].transform;
       _idles_origin[i] = _idles[i].position; _deletes_origin[i] = _deletes[i].position;
-      _lights[i]=MySDE.Lights[i].transform; _lights_origin[i] = _lights[i].position;
+      _light = MySDE.MyLight.transform; _lights_origin = _light.position;
     }
     var _waittime= new WaitForSecondsRealtime(1.0f / SDModule.Flood_shakecount);
     while (true)

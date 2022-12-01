@@ -111,11 +111,12 @@ public class TutorialManager : MonoBehaviour
   {
     IsTutorial = true;
     TutorialRatio = StartCamearSize / EndCameraSize;
+    if (SkipManager.Instance.isfirst) SkipSpr.enabled = false;
   }
   private void Update()
   {
     if ( IsTutorial) {
-      if (Input.GetKeyDown(SkipKey)) {  Camera_finish();  }
+      if (Input.GetKeyDown(SkipKey)&&SkipManager.Instance.isfirst == false) {  Camera_finish();  }
       if(Input.GetKeyDown(KeyCode.LeftArrow))Key_A.PressDown();
       if(Input.GetKeyDown(KeyCode.RightArrow))Key_D.PressDown();
       if(Input.GetKeyUp(KeyCode.LeftArrow))Key_A.PressUp();

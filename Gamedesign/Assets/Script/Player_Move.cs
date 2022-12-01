@@ -283,7 +283,7 @@ public class Player_Move : MonoBehaviour
 
       Dead_body(_spikepos, false);
     }
-    else if (collision.CompareTag("Rock"))  //돌에 닿았고
+ /*   else if (collision.CompareTag("Rock"))  //돌에 닿았고
     {
       Rock _rock=collision.GetComponent<Rock>();
       if (_rock!=null&&_rock.IsLanding && IsPlaying) { Dead_body(Vector2.up * -GetComponent<BoxCollider2D>().bounds.size.y / 2, true); return; }
@@ -291,7 +291,7 @@ public class Player_Move : MonoBehaviour
       if(_spinrock!=null&& _spinrock.IsPlaying && IsPlaying) { Dead_body(Vector2.up * -GetComponent<BoxCollider2D>().bounds.size.y / 2, true); return; }
 
       //그 돌이 떨어지는 상태라면 육체 죽음      화면 움직이는건 적용해보니까 구려서 뺐음
-    }
+    }   */
   }
   public void RollingStones()
   {

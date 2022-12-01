@@ -37,6 +37,7 @@ public class GameManager : MonoBehaviour
   }
   private void Awake()
   {
+    Cursor.visible = false;
     if (instance == null) instance = this;
     MyPlayerMove=PlayerTransform.GetComponent<Player_Move>();
     CurrentRespawn = OriginRespawn;
@@ -44,8 +45,9 @@ public class GameManager : MonoBehaviour
   public MainCamera MyCamera = null;
   private void Update()
   {
-//    Debug.Log(CurrentSC.name);
-//    if (Input.GetKeyDown(KeyCode.Tab)) Spawn();
+    //    Debug.Log(CurrentSC.name);
+    //    if (Input.GetKeyDown(KeyCode.Tab)) Spawn();
+    if (Input.GetKeyDown(KeyCode.F12)) Application.Quit();
   }
   private void Start()
   {
