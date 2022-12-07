@@ -48,7 +48,7 @@ public class UIManager : MonoBehaviour
     float _textlengths = 0;
     foreach (var spr in sprites) _textlengths += spr.rect.size.x;
     float _space = (length - _textlengths) / (sprites.Length -1) * (_sizeoffset);  //글자 사이 간격 계산하고
-    Debug.Log($"length : {length}   textlength : {_textlengths}  count : {sprites.Length}");
+  //  Debug.Log($"length : {length}   textlength : {_textlengths}  count : {sprites.Length}");
     LayoutGroup.spacing = _space;                                   //레이아웃 설정 대입
     float _width = 0.0f;   //이미지 넓이
     float _height = 0.0f;  //이미지 개당 높이

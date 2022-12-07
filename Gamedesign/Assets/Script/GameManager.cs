@@ -41,6 +41,7 @@ public class GameManager : MonoBehaviour
     if (instance == null) instance = this;
     MyPlayerMove=PlayerTransform.GetComponent<Player_Move>();
     CurrentRespawn = OriginRespawn;
+    Screen.SetResolution(1920, 1080, true);
   }
   public MainCamera MyCamera = null;
   private void Update()

@@ -277,7 +277,7 @@ public class Player_Move : MonoBehaviour
       WaterDownParticle.Play(); //Æþ´ç ÆÄÆ¼Å¬ À§Ä¡ ¼³Á¤ÇÏ°í ½ÇÇà
       AudioManager.Instance.PlayClip(12);
     }
-    else if (collision.CompareTag("Spike") && IsPlaying) //°¡½Ã¿¡ ´ê¾ÒÀ¸¸é À°Ã¼ Á×À½
+    else if (collision.CompareTag("Spike") && IsPlaying&&Velocity.y<0) //°¡½Ã¿¡ ´ê¾ÒÀ¸¸é À°Ã¼ Á×À½
     {
       Vector2 _spikepos = collision.ClosestPoint(MyTransform.position)-(Vector2)MyTransform.position;
 

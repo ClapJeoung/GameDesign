@@ -4945,7 +4945,7 @@ MonoBehaviour:
   MySpr: {fileID: 8033387368260894257}
   WaitTime: 1
   DestroyTime: 0.3
-  RestoreTIme: 5
+  RestoreTIme: 4
 --- !u!1 &8033387368522467281
 GameObject:
   m_ObjectHideFlags: 0

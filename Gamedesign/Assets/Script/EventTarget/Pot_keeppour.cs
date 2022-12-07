@@ -26,8 +26,10 @@ public class Pot_keeppour : EventTarget
   [SerializeField] private ParticleSystem BottomParticle = null;//물 떨어지는 곳 파티클
   private ParticleSystem.ShapeModule BottomShape;
   private bool IsActive = true;
+  private BoxCollider2D MyCol = null;
   public void Setup()
   {
+    MyCol = transform.GetChild(2).GetComponent<BoxCollider2D>();
     Bounds _bound = transform.GetComponent<BoxCollider2D>().bounds;
     RayStartPoint[0] =transform.position+ new Vector3(-_bound.size.x / 2.0f, StartPos);
     RayStartPoint[1] = transform.position + new Vector3(0.0f, StartPos);
@@ -50,15 +52,26 @@ public class Pot_keeppour : EventTarget
   private void UpdateRay()
   {
     RaycastHit2D _hit;
-    int _layer = 1 << LayerMask.NameToLayer("Player");
+    int _layer = 1 << LayerMask.NameToLayer("Wall");
     for (int i = 0; i < RayStartPoint.Length; i++)
     {
+      _layer = 1 << LayerMask.NameToLayer("Wall");
       _hit = Physics2D.Raycast(RayStartPoint[i], Vector2.down, MaxLength, _layer);
-   //   Debug.DrawLine(RayStartPoint[i], RayStartPoint[i] + Vector2.down * MaxLength,Color.red) ;
       if (_hit.transform != null)
       {
-        Debug.Log("레후~");
-        WaterFallTrans.localScale=new Vector3(0.5f,_hit.distance*SizeOffset+0.1f,1.0f);
+        Wooden _wood;
+        if (_hit.transform.TryGetComponent<Wooden>(out _wood) && _wood.IsActive)
+        {
+          WaterFallTrans.localScale = new Vector3(0.5f, _hit.distance * SizeOffset + 0.1f, 1.0f);
+          BottomShape.position = new Vector3(0.0f, _hit.point.y - transform.position.y, -1.0f);
+          return;
+        }
+      }
+      _layer = 1 << LayerMask.NameToLayer("Player");
+      _hit = Physics2D.Raycast(RayStartPoint[i], Vector2.down, MaxLength, _layer);
+      if (_hit.transform != null)
+      {
+        WaterFallTrans.localScale = new Vector3(0.5f, _hit.distance * SizeOffset + 0.1f, 1.0f);
         BottomShape.position = new Vector3(0.0f, _hit.point.y - transform.position.y, -1.0f);
         return;
       }

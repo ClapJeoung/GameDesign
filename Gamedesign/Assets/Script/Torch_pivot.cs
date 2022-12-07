@@ -5,7 +5,7 @@ using UnityEngine;
 public class Torch_pivot : MonoBehaviour
 {
   [SerializeField] private float Radgravity = 60.0f;    //기울어지는 각도 속도
-  private float CurrentRadius = 0.0f;                   //현재 각도
+  public float CurrentRadius = 0.0f;                   //현재 각도
   private float RadiusVelocity = 0.0f;                  //현재 각도의 속도
   [SerializeField] private float InputPower = 70.0f;    //입력 힘
   [SerializeField] private float Length;                //플레이어로부터의 거리
@@ -50,6 +50,7 @@ public class Torch_pivot : MonoBehaviour
   public void Dead() { IsDead = true; DeadPos = PlayerTransform.position; }
   private void Update()
   {
+ //   Debug.Log(CurrentRadius);
     if (IsDead) return;
     int _dir = CurrentRadius>0&& CurrentRadius < 180.0f ? 1 : -1;
     Accel= Radgravity *_dir;

@@ -23,7 +23,7 @@ public class SDEffect : MonoBehaviour
     {
       if (i < Count)
       {
-        Debug.Log($"{_newpos[i]} -> {Camera.main.ScreenToWorldPoint(_newpos[i])})");
+     //   Debug.Log($"{_newpos[i]} -> {Camera.main.ScreenToWorldPoint(_newpos[i])})");
         _shape = Particle_Delete[i].shape;
       //  _shape.position = Camera.main.ScreenToWorldPoint(_newpos[i])+Vector3.forward*5.0f+Vector3.up* SDM.RisingDistance;
       Particle_Delete[i].transform.localPosition= Camera.main.ScreenToWorldPoint(_newpos[i]) + Vector3.forward * 5.0f -_camerapos;

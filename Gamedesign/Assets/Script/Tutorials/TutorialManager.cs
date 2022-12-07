@@ -25,6 +25,7 @@ public class TutorialManager : MonoBehaviour
   [SerializeField] private Tutorial_stone Stone = null;                         //튜토리얼 돌
   [SerializeField] private Tutorial_lamp_dimension LampDimension = null;        //튜토리얼 차원 램프
   [SerializeField] private Tutorial_lamp_event LampEvent = null;                //튜토리얼 이벤트 램프
+  [SerializeField] private Tutorial_circle MyCircle = null;
   public void Fired() => MyUI.Fired();
   public void Set_0() //1번 튜토리얼 세팅
   {
@@ -59,6 +60,7 @@ public class TutorialManager : MonoBehaviour
   }
   public void Camera_finish() //카메라가 튜토리얼 끝내고 사이즈 축소
   {
+    MyCircle.DestroyCircle();
    if(Woodens[0]!=null) Woodens[0].DeActive();
     if (Woodens[1] != null) Woodens[1].DeActive();
    if(LampDimension!=null) LampDimension.DeActive();
@@ -113,14 +115,16 @@ public class TutorialManager : MonoBehaviour
     TutorialRatio = StartCamearSize / EndCameraSize;
     if (SkipManager.Instance.isfirst) SkipSpr.enabled = false;
   }
+  private bool PressingR = false;
+  private bool PressingL = false;
   private void Update()
   {
     if ( IsTutorial) {
-      if (Input.GetKeyDown(SkipKey)&&SkipManager.Instance.isfirst == false) {  Camera_finish();  }
-      if(Input.GetKeyDown(KeyCode.LeftArrow))Key_A.PressDown();
-      if(Input.GetKeyDown(KeyCode.RightArrow))Key_D.PressDown();
-      if(Input.GetKeyUp(KeyCode.LeftArrow))Key_A.PressUp();
-      if(Input.GetKeyUp(KeyCode.RightArrow))Key_D.PressUp();
+      if (Input.GetKeyDown(SkipKey)) {  Camera_finish();  }
+      if (Input.GetKeyDown(KeyCode.LeftArrow) && (!PressingL&&!PressingR)) { Key_A.PressDown(); MyCircle.PressLeft();PressingL = true;PressingR = false; }
+      if (Input.GetKeyDown(KeyCode.RightArrow) && (!PressingL && !PressingR)) { Key_D.PressDown();MyCircle.PressRight(); PressingL = false; PressingR = true; }
+      if (Input.GetKeyUp(KeyCode.LeftArrow)&&PressingL) { Key_A.PressUp(); PressingL = false; }
+      if (Input.GetKeyUp(KeyCode.RightArrow)&&PressingR) { Key_D.PressUp(); PressingR = false; }
     }
   }
 }
