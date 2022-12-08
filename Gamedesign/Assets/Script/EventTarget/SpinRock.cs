@@ -132,6 +132,7 @@ public class SpinRock:EventTarget
       _time += Time.deltaTime;
       yield return null;
     }
+    GetComponent<CircleCollider2D>().enabled = true;
     _color.a = 1.0f;
     _myspr.color = _color;
   }
@@ -151,6 +152,7 @@ public class SpinRock:EventTarget
     SpinTransform.GetComponent<SpriteRenderer>().enabled = false;
     DestroyParticle.Play();
     DustParticle.Stop();
+    GetComponent<CircleCollider2D>().enabled = false;
     GameManager.Instance.MyCamera.EndSpinRock();
   }
   private void OnDrawGizmos()
