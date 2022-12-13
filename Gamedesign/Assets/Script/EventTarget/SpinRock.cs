@@ -20,6 +20,7 @@ public class SpinRock:EventTarget
   float TargetX = 0.0f;
   [SerializeField] private ParticleSystem DustParticle = null;
   [SerializeField] private ParticleSystem DestroyParticle = null;
+  private AudioSource MyAudio = null;
 
   private void OnTriggerEnter2D(Collider2D collision)
   {
@@ -35,6 +36,7 @@ public class SpinRock:EventTarget
   }
   public void Setup()
   {
+    MyAudio = GetComponent<AudioSource>();
     TargetX=TargetPos.position.x;
     MySC = transform.parent.GetComponent<StageCollider>();
     MySC.MySpinRock = this;
@@ -109,7 +111,7 @@ public class SpinRock:EventTarget
 
     if (Velocity.y <= 0.05f && Velocity.y >= -0.05f) Velocity.y = 0;
     MyTransform.Translate((Velocity + Vector2.right * MoveSpeed) * Time.deltaTime);
-    if (MyTransform.position.x >= TargetX) Destroyed();
+    if (MyTransform.position.x >= TargetX) { Destroyed();AudioManager.Instance.PlayClip(17);MyAudio.Stop(); }
   }
   public  void Resetpos() => StartCoroutine(resetpos());
   private IEnumerator resetpos()
@@ -144,6 +146,7 @@ public class SpinRock:EventTarget
     DustParticle.Play();
     SpinTransform.GetComponent<SpriteRenderer>().enabled = true;
     GameManager.Instance.MyCamera.StartSpinRock();
+    MyAudio.Play();
   }
   public void Destroyed()
   {

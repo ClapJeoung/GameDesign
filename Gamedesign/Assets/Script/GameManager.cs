@@ -96,9 +96,6 @@ public class GameManager : MonoBehaviour
   {
     MyTorchPivot.Dead();  //»∂∫“ ∏ÿ√ﬂ∞Ì
     MyTorch.Dead();       //»∂∫“ ∏ÿ√ﬂ∞Ì
-    Invoke("Flooded",SDModule.RisingTime+ SDModule.Text_Waittime + SDModule.Text_AppearingTime + 3.0f);
-    CurrentSC.StopAllPots();
-    Invoke("_asdf", SDModule.RisingTime);
   }
   private void _asdf()
   {
@@ -107,6 +104,9 @@ public class GameManager : MonoBehaviour
   }
   public void Dead_soul_1() //«√∑π¿ÃæÓ ªÁ∏¡ ø¨√‚ ¿Ã»ƒ »£√‚
   {
+    Invoke("Flooded", SDModule.Text_Waittime + SDModule.Text_AppearingTime + 3.0f);
+    CurrentSC.StopAllPots();
+    Invoke("_asdf", 0.0f);
     MyCamera.StartFloodParticle();
     AudioManager.Instance.PlayClip(13);
   }

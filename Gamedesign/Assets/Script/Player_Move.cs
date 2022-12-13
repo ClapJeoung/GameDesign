@@ -77,6 +77,7 @@ public class Player_Move : MonoBehaviour
   [SerializeField] private Transform SkullHolder = null;
   [SerializeField] private float WalkingTime = 0.3f;
   [SerializeField] private Tutorialstone_jump TSJ=null;
+  [SerializeField] private RescueManger RM = null;
   public void Setup()
   {
     MyTransform = transform;
@@ -394,6 +395,7 @@ public class Player_Move : MonoBehaviour
     else { MyTransform.localScale = Vector3.zero; 
       Instantiate(SkullPrefab, SkullHolder).GetComponent<Skull>().Setup(MyTransform.position , 2); }
     //바위에 깔린거면 흔적도 남지 않고 안보이게
+
       GameManager.Instance.Dead_body(); //현재 차원 및 오브젝트 초기화
     GameManager.Instance.PlayRPParticle();  //화면 회전하는 파티클
 
@@ -401,11 +403,11 @@ public class Player_Move : MonoBehaviour
     yield return null;
   }
 
-  public void Dead_soul()         //불이 꺼져 영구적 사망
+  public void Dead_soul_0()         //불이 꺼져 영구적 사망
   {
-    StartCoroutine(dead_soul());
+    StartCoroutine(dead_soul_0());
   }
-  private IEnumerator dead_soul ()
+  private IEnumerator dead_soul_0 ()
   {
     GameManager.Instance.Dead_soul_0(); //횃불 대신 멈춰주는 함수
     AudioManager.Instance.PlayClip(3);
@@ -413,6 +415,16 @@ public class Player_Move : MonoBehaviour
     IsPlaying = false;
     IsWater = false;
     yield return new WaitForSeconds(1.0f);
+    RM.enabled = true;
+    RM.OpenRescue();
+    yield return null;
+  }
+  public void Dead_soul_1()         //불이 꺼져 영구적 사망
+  {
+    StartCoroutine(dead_soul_1());
+  }
+  private IEnumerator dead_soul_1()
+  {
     StartCoroutine(rising());
     yield return new WaitForSeconds(SDModule.RisingTime);
     GameManager.Instance.Dead_soul_1();
@@ -462,6 +474,7 @@ public class Player_Move : MonoBehaviour
     }
     DeadParticle_RealSoul.Stop();
     DeadParticle_Readsoul_gain.Stop();
+    AudioManager.Instance.PlayClip(0);
   }
   public void Respawn(Vector2 newpos,float targetx) //리스폰
   {

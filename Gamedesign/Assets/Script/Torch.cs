@@ -35,7 +35,7 @@ public class Torch : MonoBehaviour
     {
       firepower = value;
       firepower = Mathf.Clamp(FirePower, 0.0f, 1.0f);
-      if (firepower <= 0.0f) { IdleParticle.Stop(); SmokeParticle.Play(); PlayerScript.Dead_soul(); }
+      if (firepower <= 0.0f) { IdleParticle.Stop(); SmokeParticle.Play(); PlayerScript.Dead_soul_0(); }
       else if (value >= 1.0f && firepower < 1.0f) ChargedParticle.Play();
     }
   }
@@ -98,23 +98,28 @@ public class Torch : MonoBehaviour
   }
   public void Ignite()
   {
-    IsPlaying = true;
     StartCoroutine(ignite());
   }
   private IEnumerator ignite()
   {
-    FireTrans.localScale = Vector3.one;
-    ChargedParticle_shape.position = FireTrans.position;
-    ChargedParticle.Play();
-    float _time = 0.0f;
-    while (_time < 0.1f)
+    if (FirePower == 1.0f)
     {
-      MyLight.intensity = Mathf.Lerp(0.0f, MaxIntensity, _time / 0.1f);
-      _time += Time.deltaTime;
-      yield return null;
+      ChargedParticle_shape.position = FireTrans.position;
+      ChargedParticle.Play();
     }
+    FireTrans.localScale = Vector3.one;
     FirePower = 1.0f;
     IdleParticle.Play();
     MyLight.intensity = MaxIntensity;
+    IsPlaying = true;
+    yield return null;
+  }
+  public void Reborn()
+  {
+    FireTrans.localScale = Vector3.one;
+    MyLight.intensity = MaxIntensity;
+    ChargedParticle_shape.position = FireTrans.position;
+    ChargedParticle.Play();
+    IdleParticle.Play();
   }
 }

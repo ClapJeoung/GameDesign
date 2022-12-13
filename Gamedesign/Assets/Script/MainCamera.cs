@@ -37,6 +37,8 @@ public class MainCamera : MonoBehaviour
   [SerializeField] private Light2D MyLight = null;
   private float OriginIntensity = 0.0f;
   private float OriginSize = 5.4f;                                    //카메라 기본 사이즈
+  [SerializeField] private SpriteRenderer RescueBackground = null;  //회색배경
+  private float RescueSize = 4.0f;
   [HideInInspector] public float CurrentSizeRatio
   {
     get { return MyCamera.orthographicSize / OriginSize; }
@@ -107,6 +109,29 @@ public class MainCamera : MonoBehaviour
     }
   }
   public void EndSpinRock() => StopCoroutine(rockshakecoroutine);
+  private IEnumerator torescue(bool isopen)
+  {
+    float _time = 0.0f, _targettime = 0.3f;
+    float _originsize = MyCamera.orthographicSize, _targetsize = isopen ? 4.0f : 5.4f;
+    float _originA = isopen ? 0.0f : 0.8f, _targetA = isopen ? 0.8f : 0.0f;
+    Color _col = Color.gray;
+    _col.a = _originA;
+    RescueBackground.color = _col;
+    if(isopen)  RescueBackground.enabled = true;
+    while (_time < _targettime)
+    {
+      MyCamera.orthographicSize=Mathf.Lerp(_originsize, _targetsize, Mathf.Pow(_time/_targettime,2.0f));
+      _col.a = Mathf.Lerp(_originA, _targetA, Mathf.Pow(_time / _targettime, 2.0f));
+      RescueBackground.color = _col;
+      _time += Time.deltaTime;
+      yield return null;
+    }
+    MyCamera.orthographicSize = _targetsize;
+    _col.a = _targetA;RescueBackground.color= _col;
+    if (!isopen) RescueBackground.enabled = false;
+  }
+  public void OpenRescue() => StartCoroutine(torescue(true));
+  public void CloseRescue()=>StartCoroutine(torescue(false));
 
   #region CameraEvent 관련 함수
 
