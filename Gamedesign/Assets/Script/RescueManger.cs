@@ -14,11 +14,14 @@ public class RescueManger : MonoBehaviour
   [SerializeField] private float Speed = 1.0f; //진행도 증가 속도
   private float Offset = 0.2f;      //진행도랑 오브젝트 크기 오차범위
   [SerializeField] private ParticleSystem Success = null;
+  [SerializeField] private ParticleSystem Success_background = null;
   [SerializeField] private ParticleSystem Fail = null;
+  [SerializeField] private ParticleSystem Fail_background = null;
   [SerializeField] private Torch MyTorch = null;[SerializeField] private Player_Move MyPlayer = null;
   private bool IsPlaying = true;
   private int RescueStack = 0;
   [SerializeField] private ParticleSystem PlayerFired = null;
+  [SerializeField] private ParticleSystem TorchFired = null;
   [SerializeField] private SpriteRenderer SpaceSpr = null;
   private Color Space_Idle = Color.white;
   [SerializeField] private Color Space_Pressed = Color.white;
@@ -47,9 +50,15 @@ public class RescueManger : MonoBehaviour
       MyTorch.Reborn();
       MyCamera.CloseRescue();
       PlayerFired.Play();
+      TorchFired.Play();
       MyPlayer.transform.localScale = Vector3.zero;
       Speed *= 2.0f;
       StartCoroutine(destroyfire());
+     /* var _bgem = Success_background.emission;
+      var _bust = _bgem.GetBurst(0);
+      _bust.count = 200.0f;
+      _bgem.SetBurst(0, _bust);
+      Success_background.Play();  */
       yield return new WaitForSeconds(0.5f);
       GameManager.Instance.Dead_body(); //현재 차원 및 오브젝트 초기화
       GameManager.Instance.PlayRPParticle();  //화면 회전하는 파티클
@@ -65,6 +74,11 @@ public class RescueManger : MonoBehaviour
       yield return new WaitForSeconds(0.25f);
       ParticleSystem.ShapeModule _shape = Success.shape;
       _shape.scale = Vector3.one * CurrentPRG;
+      var _bgem = Success_background.emission;
+      var _bust = _bgem.GetBurst(0);
+      _bust.count = 60.0f * RescueStack; ;
+      _bgem.SetBurst(0, _bust);
+      Success_background.Play();
       Success.Play();
       StartCoroutine(startrescue());
     }
@@ -74,6 +88,7 @@ public class RescueManger : MonoBehaviour
       ParticleSystem.ShapeModule _shape = Fail.shape;
       _shape.scale = Vector3.one * CurrentPRG;
       Fail.Play();
+      Fail_background.Play();
       MyCamera.CloseRescue();
       MyPlayer.Dead_soul_1();
       StartCoroutine(destroyfire());
@@ -108,6 +123,7 @@ public class RescueManger : MonoBehaviour
     ParticleSystem.ShapeModule _shape = Fail.shape;
     _shape.scale = Vector3.one * CurrentPRG;
     Fail.Play();
+    Fail_background.Play();
     MyPlayer.Dead_soul_1();
     MyCamera.CloseRescue();
     StartCoroutine(destroyfire());
